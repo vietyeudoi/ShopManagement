@@ -1,0 +1,62 @@
+﻿@model Sieu_Thi_Mini.Models.Category
+
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Sửa danh mục";
+}
+
+<div class="container-fluid">
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0">Sửa danh mục</h4>
+        </div>
+
+        <div class="card-body">
+            <form asp-area="Admin"
+                  asp-controller="Category"
+                  asp-action="Edit"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="CategoryId" />
+
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                <!-- TÊN DANH MỤC -->
+                <div class="mb-3">
+                    <label asp-for="CategoryName" class="form-label fw-bold"></label>
+                    <input asp-for="CategoryName" class="form-control" />
+                    <span asp-validation-for="CategoryName" class="text-danger"></span>
+                </div>
+
+                <!-- MÔ TẢ -->
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label fw-bold"></label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                </div>
+
+                <!-- TRẠNG THÁI -->
+                <div class="form-check mb-4">
+                    <input asp-for="IsActive" class="form-check-input" />
+                    <label asp-for="IsActive" class="form-check-label">
+                        Hoạt động
+                    </label>
+                </div>
+
+                <!-- BUTTON -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">
+                        Cập nhật
+                    </button>
+                    <a asp-area="Admin"
+                       asp-controller="Category"
+                       asp-action="Index"
+                       class="btn btn-secondary">
+                        Quay lại
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,74 @@
+﻿@using Sieu_Thi_Mini.Models
+@model List<Category>
+
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Quản lý danh mục";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Quản lý danh mục</h2>
+
+    <a asp-area="Admin"
+       asp-controller="Category"
+       asp-action="Create"
+       class="btn btn-primary">
+        + Thêm danh mục
+    </a>
+</div>
+
+<table class="table table-bordered table-hover align-middle">
+    <thead class="table-dark text-center">
+        <tr>
+            <th>Tên danh mục</th>
+            <th>Mô tả</th>
+            <th>Trạng thái</th>
+            <th style="width:180px">Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.CategoryName</td>
+                <td>@c.Description</td>
+                <td class="text-center">
+                    @if (c.IsActive)
+                    {
+                        <span class="badge bg-success">Hoạt động</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Ẩn</span>
+                    }
+                </td>
+                <td class="text-center">
+                    <!-- EDIT -->
+                    <a asp-area="Admin"
+                       asp-controller="Category"
+                       asp-action="Edit"
+                       asp-route-id="@c.CategoryId"
+                       class="btn btn-warning btn-sm">
+                        Sửa
+                    </a>
+
+                    <!-- TOGGLE -->
+                    <a asp-area="Admin"
+                       asp-controller="Category"
+                       asp-action="Toggle"
+                       asp-route-id="@c.CategoryId"
+                       class="btn btn-sm @(c.IsActive ? "btn-secondary" : "btn-info")">
+                        @(c.IsActive ? "Ẩn" : "Hiện")
+                    </a>
+                    <a asp-area="Admin"
+                       asp-controller="Category"
+                       asp-action="Delete"
+                       asp-route-id="@c.CategoryId"
+                       class="btn btn-danger btn-sm">
+                        Xoá
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

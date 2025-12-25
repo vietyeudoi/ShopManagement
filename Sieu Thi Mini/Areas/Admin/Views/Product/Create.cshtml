@@ -1,0 +1,97 @@
+﻿@model Sieu_Thi_Mini.Models.Product
+
+@{
+    ViewData["Title"] = "Thêm sản phẩm";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">➕ Thêm sản phẩm</h5>
+    </div>
+
+    <div class="card-body">
+        <form asp-area="Admin"
+              asp-controller="Product"
+              asp-action="Create"
+              method="post"
+              enctype="multipart/form-data">
+
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+            <div class="row">
+                <!-- LEFT -->
+                <div class="col-md-8">
+
+                    <div class="mb-3">
+                        <label asp-for="ProductName" class="form-label"></label>
+                        <input asp-for="ProductName" class="form-control" />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Price" class="form-label"></label>
+                            <input asp-for="Price" class="form-control" />
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Stock" class="form-label"></label>
+                            <input asp-for="Stock" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Danh mục</label>
+                        <select asp-for="CategoryId"
+                                asp-items="ViewBag.CategoryId"
+                                class="form-select">
+                            <option value="">-- Chọn danh mục --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                    </div>
+                </div>
+
+                <!-- RIGHT -->
+                <div class="col-md-4">
+                    <div class="border rounded p-3 text-center">
+                        <label class="form-label fw-bold">Ảnh sản phẩm</label>
+
+                        <img id="previewImg"
+                             src="https://via.placeholder.com/200x200?text=No+Image"
+                             class="img-fluid mb-2"
+                             style="object-fit:cover; max-height:200px" />
+
+                        <input type="file"
+                               name="ImageFile"
+                               class="form-control"
+                               accept="image/*"
+                               onchange="previewImage(event)" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">
+                    💾 Lưu
+                </button>
+                <a asp-action="Index" class="btn btn-secondary ms-2">
+                    ⬅ Quay lại
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function previewImage(event) {
+            const img = document.getElementById('previewImg');
+            img.src = URL.createObjectURL(event.target.files[0]);
+        }
+    </script>
+}
