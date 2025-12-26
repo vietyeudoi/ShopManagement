@@ -1,0 +1,87 @@
+﻿@using Sieu_Thi_Mini.Models
+@model IEnumerable<Product>
+@{
+    Layout = "_LayoutAdmin";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Danh sách sản phẩm</h3>
+
+    <a asp-area="Admin"
+       asp-controller="Product"
+       asp-action="Create"
+       class="btn btn-primary">
+        + Thêm sản phẩm
+    </a>
+</div>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Ảnh</th>
+            <th>Tên</th>
+            <th>Danh mục</th>
+            <th>Giá</th>
+            <th>Kho</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model)
+{
+    <tr>
+        <td>
+            @if (!string.IsNullOrEmpty(item.ImageUrl))
+            {
+                <img src="~/upload/@item.ImageUrl"
+                     width="60" height="60"
+                     style="object-fit:cover" />
+            }
+        </td>
+
+        <td>@item.ProductName</td>
+        <td>@item.Category?.CategoryName</td>
+        <td>@item.Price.ToString("N0")</td>
+        <td>@item.Stock</td>
+
+        <td>
+            @if (item.IsActive)
+            {
+                <span class="badge bg-success">Đang bán</span>
+            }
+            else
+            {
+                <span class="badge bg-danger">Ngừng bán</span>
+            }
+        </td>
+
+        <td>
+            <!-- EDIT -->
+            <a asp-area="Admin"
+               asp-controller="Product"
+               asp-action="Edit"
+               asp-route-id="@item.ProductId"
+               class="btn btn-warning btn-sm">
+                Sửa
+            </a>
+
+            <!-- TOGGLE -->
+            <a asp-area="Admin"
+               asp-controller="Product"
+               asp-action="Toggle"
+               asp-route-id="@item.ProductId"
+                       class="btn btn-sm @(item.IsActive ? "btn-secondary" : "btn-info")">
+                @(item.IsActive ? "Ẩn" : "Hiện")
+            </a>
+            <a asp-area="Admin"
+                asp-controller="Product"
+                asp-action="Delete"
+                asp-route-id="@item.ProductId"
+                class="btn btn-danger btn-sm">
+                Xoá
+            </a>
+        </td>
+    </tr>
+}
+    </tbody>
+</table>

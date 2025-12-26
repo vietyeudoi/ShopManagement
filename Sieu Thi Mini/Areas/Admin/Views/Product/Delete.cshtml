@@ -1,0 +1,33 @@
+﻿@model Sieu_Thi_Mini.Models.Product
+@{
+    Layout = "_LayoutAdmin";
+}
+
+<div class="container-fluid">
+    <div class="card shadow-sm">
+        <div class="card-header bg-danger text-white">
+            <h4>Xoá sản phẩm</h4>
+        </div>
+
+        <div class="card-body">
+            <p>Bạn chắc chắn muốn xoá sản phẩm:</p>
+            <h5 class="text-danger">@Model.ProductName</h5>
+
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="~/upload/@Model.ImageUrl" width="120" class="mb-3" />
+            }
+
+            <form asp-area="Admin"
+                  asp-controller="Product"
+                  asp-action="DeleteConfirmed"
+                  asp-route-id="@Model.ProductId"
+                  method="post">
+                @Html.AntiForgeryToken()
+
+                <button type="submit" class="btn btn-danger">Xoá</button>
+                <a asp-action="Index" class="btn btn-secondary">Huỷ</a>
+            </form>
+        </div>
+    </div>
+</div>

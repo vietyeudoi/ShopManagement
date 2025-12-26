@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 namespace Sieu_Thi_Mini.Models;
 
@@ -26,13 +27,15 @@ public partial class Product
 
     public int CategoryId { get; set; }
 
-    public bool? IsActive { get; set; }
+    public bool IsActive { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime? CreatedAt { get; set; }
 
     [ForeignKey("CategoryId")]
     [InverseProperty("Products")]
+
+    [ValidateNever]
     public virtual Category Category { get; set; } = null!;
 
     [InverseProperty("Product")]

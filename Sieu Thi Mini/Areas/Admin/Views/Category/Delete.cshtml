@@ -1,0 +1,28 @@
+﻿@model Sieu_Thi_Mini.Models.Category
+@{
+    Layout = "_LayoutAdmin";
+}
+
+<div class="container-fluid">
+    <div class="card shadow-sm">
+        <div class="card-header bg-danger text-white">
+            <h4>Xoá danh mục</h4>
+        </div>
+
+        <div class="card-body">
+            <p>Bạn chắc chắn muốn xoá danh mục:</p>
+            <h5 class="text-danger">@Model.CategoryName</h5>
+
+            <form asp-area="Admin"
+                  asp-controller="Category"
+                  asp-action="DeleteConfirmed"
+                  asp-route-id="@Model.CategoryId"
+                  method="post">
+                @Html.AntiForgeryToken()
+
+                <button type="submit" class="btn btn-danger">Xoá</button>
+                <a asp-action="Index" class="btn btn-secondary">Huỷ</a>
+            </form>
+        </div>
+    </div>
+</div>
