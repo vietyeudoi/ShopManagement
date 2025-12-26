@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Sieu_Thi_Mini.Models;
 using Sieu_Thi_Mini.Filters;
 
-namespace Sieu_Thi_Mini.Areas.Admin.Controllers
+namespace Sieu_Thi_Mini.Areas.Customer.Controllers
 {
-    [Area("Admin")]
-    [Route("admin/")]
-    public class DashboardController : BaseAdminController
+    [Area("Customer")]
+    [Route("Customer/")]
+    public class DashboardController : BaseCustomerController
     {
 
         public IActionResult Index()

@@ -7,9 +7,8 @@ using System.Diagnostics;
 namespace Sieu_Thi_Mini.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    //[Authorize(Roles = "Admin")]
     [Route("admin/category")]
-    public class CategoryController : Controller
+    public class CategoryController : BaseAdminController
     {
         private readonly ShopManagementContext _context;
 

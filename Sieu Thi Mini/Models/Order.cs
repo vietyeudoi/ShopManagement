@@ -22,7 +22,17 @@ public partial class Order
     public decimal TotalAmount { get; set; }
 
     [StringLength(50)]
-    public string? Status { get; set; }
+
+    public OrderStatus Status { get; set; } = OrderStatus.Pending;
+
+    public enum OrderStatus
+    {
+        Pending,        // Chờ xác nhận
+        Confirmed,      // Đã xác nhận
+        InProgress,     // Đang giao
+        Completed,      // Thành công
+        Cancelled       // Đã hủy
+    }
 
     [ForeignKey("CustomerId")]
     [InverseProperty("Orders")]
@@ -37,4 +47,7 @@ public partial class Order
     [ForeignKey("UserId")]
     [InverseProperty("Orders")]
     public virtual User User { get; set; } = null!;
+
+    //public ICollection<User> Users { get; set; } = new List<User>();
+    //public ICollection<Customer> Customers { get;  set; } = new List<Customer>();
 }

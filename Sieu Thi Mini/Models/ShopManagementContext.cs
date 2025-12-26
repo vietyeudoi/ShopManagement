@@ -54,7 +54,8 @@ public partial class ShopManagementContext : DbContext
             entity.HasKey(e => e.OrderId).HasName("PK__Orders__C3905BCF5E93A67B");
 
             entity.Property(e => e.OrderDate).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Status).HasDefaultValue("Chờ xác nhận");
+            entity.Property(e => e.Status).HasConversion<string>().HasMaxLength(50);
+
 
             entity.HasOne(d => d.Customer).WithMany(p => p.Orders)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -81,6 +82,8 @@ public partial class ShopManagementContext : DbContext
             entity.HasKey(e => e.PaymentId).HasName("PK__Payments__9B556A389909468B");
 
             entity.Property(e => e.PaymentDate).HasDefaultValueSql("(getdate())");
+
+            entity.Property(p => p.PaymentStatus).HasConversion<string>().HasMaxLength(50);
 
             entity.HasOne(d => d.Order).WithOne(p => p.Payment).HasConstraintName("FK_Payments_Orders");
         });

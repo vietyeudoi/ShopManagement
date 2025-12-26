@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Sieu_Thi_Mini.Areas.Admin.Controllers;
 using Sieu_Thi_Mini.Models;
 using System;
 
 [Area("Admin")]
 [Route("admin/product")]
-public class ProductController : Controller
+public class ProductController : BaseAdminController
 {
     private readonly ShopManagementContext _context;
     private readonly IWebHostEnvironment _env;
@@ -18,7 +19,6 @@ public class ProductController : Controller
     }
 
     [HttpGet("")]
-    [HttpGet("index")]
     public async Task<IActionResult> Index()
     {
         var products = await _context.Products

@@ -1,0 +1,155 @@
+﻿@using Sieu_Thi_Mini.Helpers
+@model Sieu_Thi_Mini.Models.Order
+
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Chi tiết đơn hàng";
+}
+
+<h2 class="mb-4">Chi tiết đơn hàng #@Model.OrderId</h2>
+
+<!-- INFO ROW -->
+<div class="row mb-4">
+    <!-- ORDER INFO -->
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                Thông tin đơn hàng
+            </div>
+            <div class="card-body">
+                <p><strong>Khách hàng:</strong> @Model.Customer?.FullName</p>
+                <p><strong>Nhân viên:</strong> @Model.User?.FullName</p>
+
+                <p>
+                    <strong>Trạng thái:</strong>
+                    <span class="badge @Model.Status.ToBadge()">
+                        @Model.Status.ToVietnamese()
+                    </span>
+                </p>
+
+                <p>
+                    <strong>Tổng tiền:</strong>
+                    <span class="text-danger fw-bold">
+                        @Model.TotalAmount.ToString("N0") đ
+                    </span>
+                </p>
+
+                <!-- FORM ĐỔI TRẠNG THÁI -->
+                <form asp-action="ChangeStatus"
+                      method="post"
+                      class="d-flex gap-2 align-items-center mt-3">
+
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="orderId" value="@Model.OrderId" />
+
+                    <select name="status" class="form-select w-auto">
+                        @foreach (Order.OrderStatus s in Enum.GetValues(typeof(Order.OrderStatus)))
+                        {
+                            <option value="@s" selected="@(s == Model.Status)">
+                                @s.ToVietnamese()
+                            </option>
+                        }
+                    </select>
+
+                    <button type="submit" class="btn btn-success">
+                        Cập nhật
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAYMENT INFO -->
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                Thông tin thanh toán
+            </div>
+            <div class="card-body">
+
+                @if (Model.Payment != null)
+                {
+                    <p>
+                        <strong>Trạng thái:</strong>
+                        <span class="badge @Model.Payment.PaymentStatus.ToBadge()">
+                            @Model.Payment.PaymentStatus.ToVietnamese()
+                        </span>
+                    </p>
+
+                    <p>
+                        <strong>Ngày thanh toán:</strong>
+                        @Model.Payment.PaymentDate?.ToString("dd/MM/yyyy HH:mm")
+                    </p>
+
+                    <!-- FORM ĐỔI TRẠNG THÁI THANH TOÁN -->
+                    <form asp-action="ChangePaymentStatus"
+                          method="post"
+                          class="d-flex gap-2 align-items-center mt-3">
+
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="orderId" value="@Model.OrderId" />
+
+                        <select name="status" class="form-select w-auto">
+                            @foreach (Payment.PaymentStatusEnum s in
+                                                    Enum.GetValues(typeof(Payment.PaymentStatusEnum)))
+                            {
+                                <option value="@s"
+                                        selected="@(s == Model.Payment.PaymentStatus)">
+                                    @s.ToVietnamese()
+                                </option>
+                            }
+                        </select>
+
+                        <button type="submit" class="btn btn-success">
+                            Cập nhật
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <p class="text-muted">Chưa có thông tin thanh toán</p>
+                }
+
+            </div>
+        </div>
+    </div>
+
+
+<!-- PRODUCT LIST -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white">
+        Danh sách sản phẩm
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-bordered mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th class="text-center">Số lượng</th>
+                    <th class="text-end">Đơn giá</th>
+                    <th class="text-end">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OrderDetails)
+                {
+                    <tr>
+                        <td>@item.Product?.ProductName</td>
+                        <td class="text-center">@item.Quantity</td>
+                        <td class="text-end">@item.UnitPrice.ToString("N0")</td>
+                        <td class="text-end fw-bold">
+                            @((item.Quantity * item.UnitPrice).ToString("N0"))
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<a asp-area="Admin"
+   asp-controller="Order"
+   asp-action="Index"
+   class="btn btn-secondary">
+    Quay lại danh sách
+</a>

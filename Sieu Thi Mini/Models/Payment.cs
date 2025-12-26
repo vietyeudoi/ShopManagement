@@ -21,9 +21,16 @@ public partial class Payment
     public DateTime? PaymentDate { get; set; }
 
     [StringLength(50)]
-    public string? PaymentStatus { get; set; }
+    public PaymentStatusEnum PaymentStatus { get; set; } = PaymentStatusEnum.Pending;
 
     [ForeignKey("OrderId")]
     [InverseProperty("Payment")]
     public virtual Order Order { get; set; } = null!;
+
+    public enum PaymentStatusEnum
+    {
+        Pending,    // Chưa thanh toán
+        Paid,       // Đã thanh toán
+        Failed      // Thất bại
+    }
 }
