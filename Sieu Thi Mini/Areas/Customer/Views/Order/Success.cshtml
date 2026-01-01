@@ -1,0 +1,45 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+<a asp-area="Customer" asp-controller="Home" asp-action="Index"> </a>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Đảm bảo đúng tên file layout của bạn
+    ViewData["Title"] = "Đặt hàng thành công";
+    var orderId = ViewBag.OrderId;
+}
+
+<style>
+    .success-container { background-color: #f8f9fa; min-height: 80vh; display: flex; align-items: center; justify-content: center; }
+    .success-card { background: #fff; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; max-width: 500px; width: 100%; border-top: 5px solid #28a745; }
+    .success-icon { font-size: 80px; color: #28a745; margin-bottom: 20px; }
+    .order-id-box { background: #f1f3f5; padding: 15px; border-radius: 10px; margin: 20px 0; border: 1px dashed #ced4da; }
+    .btn-home { background: #e31837; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; text-decoration: none; transition: 0.3s; }
+    .btn-home:hover { background: #c4122d; color: white; transform: translateY(-2px); }
+</style>
+
+<div class="success-container">
+    <div class="success-card">
+        <div class="success-icon">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <h2 class="fw-bold">Đặt hàng thành công!</h2>
+        <p class="text-muted">Cảm ơn bạn đã tin tưởng và mua sắm tại <strong>Siêu Thị Mini</strong>. Đơn hàng của bạn đang được hệ thống xử lý.</p>
+
+        <div class="order-id-box">
+            <span class="text-muted d-block">Mã đơn hàng của bạn:</span>
+            <h4 class="fw-bold text-dark mb-0">#@orderId</h4>
+        </div>
+
+        <p class="small text-muted mb-4">Một email xác nhận đã được gửi đến bạn. Nhân viên sẽ liên hệ xác nhận trong thời gian sớm nhất.</p>
+
+        <div class="d-grid gap-2">
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="btn-home">
+                Tiếp tục mua sắm
+            </a>
+            <a asp-area="Customer" asp-controller="Order" asp-action="History" class="text-decoration-none text-primary mt-2 small">
+                Xem lịch sử đơn hàng
+            </a>
+        </div>
+    </div>
+</div>

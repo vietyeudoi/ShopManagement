@@ -1,0 +1,156 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model List<Sieu_Thi_Mini.Models.CartItem>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Thanh toán";
+    var totalAmount = Model.Sum(x => x.Total);
+}
+
+<style>
+    .checkout-body { background-color: #f8f9fa; padding-top: 30px; padding-bottom: 50px; }
+    .checkout-card { background: #fff; border-radius: 12px; border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.05); padding: 25px; margin-bottom: 20px; }
+    .checkout-title { font-weight: 700; font-size: 1.25rem; margin-bottom: 25px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+    .form-label { font-weight: 600; font-size: 0.9rem; color: #444; }
+    .form-control { border-radius: 8px; padding: 12px; border: 1px solid #ddd; }
+    .form-control:focus { border-color: #e31837; box-shadow: 0 0 0 0.2rem rgba(227, 24, 55, 0.1); }
+    .product-item-sm { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f1f1; }
+    .product-img-sm { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; margin-right: 15px; border: 1px solid #eee; }
+    .payment-method-item { border: 1px solid #ddd; border-radius: 10px; padding: 15px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s ease; position: relative; }
+    .payment-method-item:hover { border-color: #e31837; }
+    .payment-method-item input[type="radio"]:checked + label { color: #e31837; }
+    .payment-method-item.active-method { border: 2px solid #e31837; background-color: #fff8f8; }
+    .btn-checkout { background-color: #e31837; border: none; padding: 15px; font-weight: 700; border-radius: 10px; font-size: 1.1rem; transition: 0.3s; color: white; }
+    .btn-checkout:hover { background-color: #c4122d; transform: translateY(-2px); color: white; }
+    .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1rem; }
+    .text-winmart { color: #e31837; }
+</style>
+
+<div class="checkout-body">
+    <div class="container">
+        <a href="@Url.Action("Index", "Cart", new { area = "Customer" })" class="text-decoration-none text-muted mb-4 d-inline-block">
+            <i class="bi bi-arrow-left"></i> Quay lại giỏ hàng
+        </a>
+        
+        <h3 class="mb-4 fw-bold" style="font-size: 32px;">
+            <i class="bi bi-credit-card-2-front text-danger me-2"></i>
+            Checkout
+        </h3>
+
+        <form asp-action="Checkout" asp-controller="Order" asp-area="Customer" method="post">
+            <div class="row">
+                <div class="col-lg-7">
+                    <div class="checkout-card">
+                        <h4 class="checkout-title">Thông tin nhận hàng</h4>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                            <input name="FullName" class="form-control" placeholder="Nhập họ tên của bạn" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" name="Email" class="form-control" placeholder="example@gmail.com" required />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                <input name="Phone" class="form-control" placeholder="Số điện thoại nhận hàng" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                                <input name="Address" class="form-control" placeholder="Số nhà, tên đường..." required />
+                            </div>
+                        </div>
+
+                        <div class="mb-0">
+                            <label class="form-label">Ghi chú đơn hàng (Tùy chọn)</label>
+                            <textarea name="OrderNote" class="form-control" rows="3" placeholder="Ghi chú về đơn hàng hoặc thời gian giao hàng..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="checkout-card">
+                        <h4 class="checkout-title">Phương thức thanh toán</h4>
+                        <div class="payment-methods">
+                            <div class="payment-method-item active-method">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment" id="cod" value="COD" checked>
+                                    <label class="form-check-label fw-bold ms-2" for="cod">
+                                        <i class="bi bi-cash-stack me-2"></i> Thanh toán khi nhận hàng (COD)
+                                    </label>
+                                    <p class="text-muted small ms-4 mb-0">Thanh toán bằng tiền mặt khi nhận hàng.</p>
+                                </div>
+                            </div>
+                            <div class="payment-method-item">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment" id="bank" value="Bank">
+                                    <label class="form-check-label fw-bold ms-2" for="bank">
+                                        <i class="bi bi-bank me-2"></i> Chuyển khoản Ngân hàng / Ví điện tử
+                                    </label>
+                                    <p class="text-muted small ms-4 mb-0">Chuyển khoản qua mã QR hoặc STK ngân hàng.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="checkout-card position-sticky" style="top: 20px;">
+                        <h4 class="checkout-title">Đơn hàng của bạn</h4>
+                        
+                        <div class="product-list mb-4">
+                            @foreach (var item in Model)
+                            {
+                                <div class="product-item-sm">
+                                    <img src="@item.ImageUrl" class="product-img-sm" alt="@item.ProductName">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold text-truncate" style="max-width: 200px;">@item.ProductName</div>
+                                        <div class="text-muted small">SL: @item.Quantity</div>
+                                    </div>
+                                    <div class="fw-bold text-end">@item.Total.ToString("N0") ₫</div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="summary-details">
+                            <div class="summary-row">
+                                <span>Tạm tính</span>
+                                <span>@totalAmount.ToString("N0") ₫</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Phí vận chuyển</span>
+                                <span class="text-success">Miễn phí</span>
+                            </div>
+                            <hr />
+                            <div class="summary-row align-items-center">
+                                <span class="fw-bold fs-5">Tổng cộng</span>
+                                <span class="fw-bold fs-4 text-winmart">@totalAmount.ToString("N0") ₫</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-checkout w-100 mt-4">
+                            Xác nhận đặt hàng
+                        </button>
+                        
+                        <p class="text-center text-muted small mt-3">
+                            <i class="bi bi-shield-check"></i> Bảo mật thông tin thanh toán 100%
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Script nhỏ để đổi màu viền khi chọn phương thức thanh toán
+    document.querySelectorAll('.payment-method-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.payment-method-item').forEach(i => i.classList.remove('active-method'));
+            this.classList.add('active-method');
+            this.querySelector('input').checked = true;
+        });
+    });
+</script>

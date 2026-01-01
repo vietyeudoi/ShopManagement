@@ -1,0 +1,105 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model List<Sieu_Thi_Mini.Models.Order>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Lịch sử đơn hàng";
+}
+
+<style>
+    .history-container { background-color: #f8f9fa; padding: 40px 0; min-height: 80vh; }
+    .history-card { background: #fff; border-radius: 12px; border: none; box-shadow: 0 2px 12px rgba(0,0,0,0.05); padding: 30px; }
+    
+    /* Style cho phần Tabs bộ lọc */
+    .order-tabs { display: flex; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #eee; margin-bottom: 25px; }
+    .tab-item { flex: 1; text-align: center; padding: 15px; cursor: pointer; color: #666; font-weight: 500; transition: 0.3s; border-bottom: 3px solid transparent; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .tab-item:hover { background: #fdf2f2; color: #e31837; }
+    .tab-item.active { color: #e31837; border-bottom-color: #e31837; background: #fff1f1; }
+    .count-badge { background: #adb5bd; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
+    .tab-item.active .count-badge { background: #e31837; }
+
+    /* Bảng cũ */
+    .table thead { background-color: #f1f3f5; }
+    .table thead th { border: none; color: #495057; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; padding: 15px; }
+    .table tbody td { vertical-align: middle; padding: 15px; border-color: #f1f1f1; }
+    .badge-custom { padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 0.75rem; }
+    .bg-pending { background-color: #fff4e6; color: #fd7e14; }/* Chờ xác nhận */
+    .bg-success-light { background-color: #ebfbee; color: #40c057; }/* Đã thanh toán */
+    .bg-danger-light { background-color: #fff5f5; color: #fa5252; }.btn-detail { border: 1px solid #dee2e6; color: #495057; border-radius: 6px; padding: 5px 15px; transition: 0.2s; font-size: 0.9rem; }/* Đã hủy */
+    .btn-detail:hover { background-color: #e31837; color: white; border-color: #e31837; }
+    .text-price { color: #e31837; font-weight: 700; }
+    .text-price { color: #e31837; font-weight: 700; }
+</style>
+
+<div class="history-container">
+    <div class="container">
+        <h3 class="fw-bold mb-1">Lịch sử mua hàng</h3>
+        <p class="text-muted mb-4 small">Quản lý và theo dõi tất cả đơn hàng của bạn</p>
+
+        <div class="order-tabs">
+            <a href="#" class="tab-item active">
+                Tất cả <span class="count-badge">@Model.Count</span>
+            </a>
+            <a href="#" class="tab-item">
+                Chờ xác nhận <span class="count-badge">@Model.Count(x => x.Status.Contains("Chờ"))</span>
+            </a>
+            <a href="#" class="tab-item">
+                Đã thanh toán <span class="count-badge">@Model.Count(x => x.Status.Contains("thanh toán"))</span>
+            </a>
+            <a href="#" class="tab-item">
+                Đã hủy <span class="count-badge">@Model.Count(x => x.Status.Contains("Hủy"))</span>
+            </a>
+        </div>
+
+        <div class="history-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold mb-0">Đơn hàng của tôi</h3>
+                <span class="badge bg-dark">@Model.Count đơn hàng</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="fw-bold">#@item.OrderId</td>
+                                <td class="text-muted">@item.OrderDate?.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="text-price">@item.TotalAmount.ToString("N0")đ</td>
+                                <td>
+                                    @if (item.Status.Contains("Chờ"))
+                                    {
+                                        <span class="badge-custom bg-pending">Chờ xác nhận</span>
+                                    }
+                                    else if (item.Status.Contains("Hủy"))
+                                    {
+                                        <span class="badge-custom bg-danger-light">Đã hủy</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-custom bg-success-light">Thành công</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="Detail" asp-route-id="@item.OrderId" class="btn btn-detail">
+                                        <i class="bi bi-eye me-1"></i> Xem chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

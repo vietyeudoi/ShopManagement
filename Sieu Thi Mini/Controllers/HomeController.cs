@@ -21,5 +21,20 @@ namespace Sieu_Thi_Mini.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+        public IActionResult Contact()
+        {
+            return View(new ContactViewModel());
+        }
+
+        [HttpPost]
+        public IActionResult Contact(ContactViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                model.ThongBao = "Gui lien he thanh cong!";
+            }
+
+            return View(model);
+        }
     }
 }
