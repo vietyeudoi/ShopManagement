@@ -36,7 +36,7 @@ namespace Sieu_Thi_Mini.Controllers
             {
                 SignInCustomer(customer);
 
-                return RedirectToAction("Index", "Dashboard", new { area = "Customer" });
+                return RedirectToAction("Index", "Home", new { area = "" });
             }
             ViewBag.Error = "Email hoặc mật khẩu không đúng";
             return View();
@@ -92,7 +92,7 @@ namespace Sieu_Thi_Mini.Controllers
 
             SignInCustomer(customer);
 
-            return RedirectToAction("Index", "Dashboard", new { area = "Customer" });
+            return RedirectToAction("Index", "Home", new { area = "" });
         }
 
 

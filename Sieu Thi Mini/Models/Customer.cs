@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Sieu_Thi_Mini.Models;
 
@@ -31,4 +32,21 @@ public partial class Customer
 
     [InverseProperty("Customer")]
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+
+    [NotMapped]
+    public List<string> ListAdress { get; set; }
+    
+    public void JAdress()
+    {
+        Address = System.Text.Json.JsonSerializer.Serialize(ListAdress);
+    }
+    public void LoadAdress()
+    {
+        //ListAdress = System.Text.Json.JsonSerializer.Deserialize<List<string>>(Address) ?? new List<string>();
+        ListAdress = string.IsNullOrEmpty(Address)
+           ? new List<string>()
+           : System.Text.Json.JsonSerializer.Deserialize<List<string>>(Address)
+             ?? new List<string>();
+    }
+
 }

@@ -15,7 +15,15 @@ public partial class Payment
     public int OrderId { get; set; }
 
     [StringLength(50)]
-    public string? PaymentMethod { get; set; }
+    public PaymentMethodEnum PaymentMethod { get; set; }
+
+    public enum PaymentMethodEnum
+        {
+        COD,
+        Bank,
+        Cash
+        
+        }
 
     [Column(TypeName = "datetime")]
     public DateTime? PaymentDate { get; set; }

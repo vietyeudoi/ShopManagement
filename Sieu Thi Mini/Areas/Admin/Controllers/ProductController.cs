@@ -28,9 +28,7 @@ public class ProductController : BaseAdminController
         return View(products);
     }
 
-    // ================= CREATE =================
 
-    // ================= CREATE =================
     [HttpGet("create")]
     public IActionResult Create()
     {
@@ -48,7 +46,6 @@ public class ProductController : BaseAdminController
             return View(product);
         }
 
-        // ===== UPLOAD IMAGE =====
         if (ImageFile != null && ImageFile.Length > 0)
         {
             string uploadFolder = Path.Combine(_env.WebRootPath, "upload");
@@ -64,7 +61,7 @@ public class ProductController : BaseAdminController
                 ImageFile.CopyTo(stream);
             }
 
-            product.ImageUrl = fileName; // 🔴 lưu TÊN FILE vào DB
+            product.ImageUrl = fileName; 
         }
 
         product.CreatedAt = DateTime.Now;
@@ -76,9 +73,6 @@ public class ProductController : BaseAdminController
         return RedirectToAction(nameof(Index));
     }
 
-
-
-    // ================= EDIT =================
 
     [HttpGet("edit/{id}")]
     public IActionResult Edit(int id)

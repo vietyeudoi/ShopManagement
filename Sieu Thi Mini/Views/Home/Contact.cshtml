@@ -1,0 +1,48 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model Sieu_Thi_Mini.Models.ContactViewModel
+
+@{
+    Layout = ViewData["Layout"]?.ToString() ?? "_Layout";
+    ViewData["Title"] = "Liên hệ";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p class="lead">Điền các thông tin liên hệ</p>
+<hr />
+
+<form method="post" asp-action="Contact">
+    <div class="mb-3">
+        <label asp-for="FirstName" class="form-label"></label>
+        <input asp-for="FirstName" class="form-control" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="LastName" class="form-label"></label>
+        <input asp-for="LastName" class="form-control" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DateOfBirth" class="form-label"></label>
+        <input asp-for="DateOfBirth" class="form-control" />
+        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <button class="btn btn-danger" type="submit">Gửi</button>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.ThongBao))
+{
+    <div class="alert alert-success mt-3">
+        @Model.ThongBao
+    </div>
+}
