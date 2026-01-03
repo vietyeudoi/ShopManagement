@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Sieu_Thi_Mini.Models;
-using System.Diagnostics;
 
 namespace Sieu_Thi_Mini.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    //[Authorize(Roles = "Admin")]
-    public class DashboardController : Controller
+    [Route("admin/")]
+    public class DashboardController : BaseAdminController
     {
         private readonly ShopManagementContext _context;
         public DashboardController(ShopManagementContext context)

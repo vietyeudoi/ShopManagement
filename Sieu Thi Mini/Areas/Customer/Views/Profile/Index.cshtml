@@ -1,0 +1,186 @@
+﻿@model Sieu_Thi_Mini.Models.Customer
+@using Sieu_Thi_Mini.Models
+
+@{
+    Layout = "_LayoutCustomer";
+    ViewData["Title"] = "Trang cá nhân";
+}
+
+<h2>Hồ sơ cá nhân</h2>
+<p class="text-muted">Quản lý thông tin cá nhân</p>
+<div class="mt-3">
+    <button type="button" class="btn btn-warning" id="btnEdit">
+        Chỉnh sửa
+    </button>
+
+    <button type="submit" class="btn btn-primary d-none" id="btnSave">
+        Lưu
+    </button>
+
+    <button type="button" class="btn btn-secondary d-none" id="btnCancel">
+        Huỷ
+    </button>
+</div>
+<form method="post" id="profileForm">
+    <input type="hidden" asp-for="CustomerId" />
+
+    <!-- ================= THÔNG TIN CÁ NHÂN ================= -->
+    <h5 class="mt-3">Thông tin cá nhân</h5>
+
+    <div class="mb-2">
+        <label class="form-label">Họ và tên *</label>
+        <input asp-for="FullName" class="form-control editable" disabled />
+    </div>
+
+    <div class="mb-2">
+        <label class="form-label">Số điện thoại *</label>
+        <input asp-for="Phone" class="form-control editable" disabled />
+    </div>
+
+    <hr />
+
+    <!-- ================= DANH SÁCH ĐỊA CHỈ ================= -->
+    <h5>Danh sách địa chỉ</h5>
+
+    @if (Model.ListAdress != null && Model.ListAdress.Count > 0)
+    {
+        for (int i = 0; i < Model.ListAdress.Count; i++)
+        {
+            <div class="border rounded p-2 mb-2">
+                <input type="hidden" name="ListAdress[@i]" value="@Model.ListAdress[i]" />
+                <p class="mb-0">@Model.ListAdress[i]</p>
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-muted">Chưa có địa chỉ nào</p>
+    }
+
+    <!-- ================= NÚT ĐIỀU KHIỂN ================= -->
+
+    <div class="mt-3">
+        <button type="button" class="btn btn-secondary d-none" id="btnAdd">
+            Thêm địa chỉ
+        </button>
+    </div>
+    <!-- ================= THÊM ĐỊA CHỈ ================= -->
+    <div class="mt-4 border-top pt-3 d-none" id="divadd">
+        <h6>Thêm địa chỉ mới</h6>
+
+        <select id="province" class="form-select editable mb-2" disabled>
+            <option value="">-- Chọn Tỉnh / Thành phố --</option>
+        </select>
+
+        <select id="district" class="form-select editable mb-2" disabled>
+            <option value="">-- Chọn Quận / Huyện --</option>
+        </select>
+
+        <select id="ward" class="form-select editable mb-2" disabled>
+            <option value="">-- Chọn Phường / Xã --</option>
+        </select>
+
+        <button type="button"
+                class="btn btn-success d-none"
+                id="btnCanceled">
+            Huỷ
+        </button>
+    </div>
+
+</form>
+
+<!-- ================= SCRIPT ================= -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const province = document.getElementById("province");
+        const district = document.getElementById("district");
+        const ward = document.getElementById("ward");
+
+        const editables = document.querySelectorAll(".editable");
+        const btnEdit = document.getElementById("btnEdit");
+        const btnSave = document.getElementById("btnSave");
+        const btnCancel = document.getElementById("btnCancel");
+        const btnAdd = document.getElementById("btnAdd");
+        const btnCanceled = document.getElementById("btnCanceled");
+        const divAdd = document.getElementById("divadd");
+        const form = document.getElementById("profileForm");
+
+        // ===== LOAD TỈNH =====
+        axios.get("https://provinces.open-api.vn/api/?depth=1")
+            .then(res => {
+                res.data.forEach(p => {
+                    province.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+                });
+            });
+
+        // ===== LOAD HUYỆN =====
+        province.onchange = function () {
+            district.innerHTML = `<option value="">-- Chọn Quận / Huyện --</option>`;
+            ward.innerHTML = `<option value="">-- Chọn Phường / Xã --</option>`;
+
+            axios.get(`https://provinces.open-api.vn/api/p/${this.selectedIndex}?depth=2`)
+                .then(res => {
+                    res.data.districts.forEach(d => {
+                        district.innerHTML += `<option value="${d.name}">${d.name}</option>`;
+                    });
+                });
+        };
+
+        // ===== LOAD XÃ =====
+        district.onchange = function () {
+            ward.innerHTML = `<option value="">-- Chọn Phường / Xã --</option>`;
+
+            axios.get(`https://provinces.open-api.vn/api/d/${this.selectedIndex}?depth=2`)
+                .then(res => {
+                    res.data.wards.forEach(w => {
+                        ward.innerHTML += `<option value="${w.name}">${w.name}</option>`;
+                    });
+                });
+        };
+
+        // ===== CHỈNH SỬA =====
+        btnEdit.onclick = function () {
+            editables.forEach(e => e.disabled = false);
+
+            btnEdit.classList.add("d-none");
+            btnSave.classList.remove("d-none");
+            btnCancel.classList.remove("d-none");
+            btnAdd.classList.remove("d-none");
+            btnCanceled.classList.remove("d-none");
+        };
+
+        // ===== HUỶ =====
+        btnCancel.onclick = () => location.reload();
+
+        // ===== HIỆN FORM THÊM ĐỊA CHỈ =====
+        btnAdd.onclick = function () {
+            divAdd.classList.remove("d-none");
+        };
+
+        // ===== THÊM ĐỊA CHỈ =====
+        // btnAddAddress.onclick = function () {
+        //     if (!province.value || !district.value || !ward.value) {
+        //         alert("Chọn đầy đủ địa chỉ");
+        //         return;
+        //     }
+
+        btnCanceled.onclick = function(){
+            divAdd.classList.add("d-none");
+        };
+
+        //     const full = `${ward.value}, ${district.value}, ${province.value}`;
+
+        //     const input = document.createElement("input");
+        //     input.type = "hidden";
+        //     input.name = "ListAdress";
+        //     input.value = full;
+
+        //     form.appendChild(input);
+        //     alert("Đã thêm địa chỉ – nhớ bấm Lưu!");
+        // };
+    });
+</script>
+

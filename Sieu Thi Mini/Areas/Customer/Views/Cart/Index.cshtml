@@ -1,0 +1,133 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model List<Sieu_Thi_Mini.Models.CartItem>
+@{
+    Layout = ViewData["Layout"]?.ToString() ?? "_Layout";
+    decimal tamTinh = Model?.Sum(x => x.Total) ?? 0;
+}
+
+<style>
+    .cart-container { background-color: #f8f9fa; padding: 30px 0; }
+    .cart-item { background: #fff; border-radius: 8px; padding: 15px; margin-bottom: 10px; border-bottom: 1px solid #eee; }
+    .product-img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; }
+    .quantity-box { display: flex; align-items: center; border: 1px solid #dc3545; border-radius: 20px; padding: 2px 10px; }
+    .quantity-box button { border: none; background: none; color: #dc3545; font-weight: bold; }
+    .quantity-box input { width: 30px; text-align: center; border: none; font-size: 14px; }
+    .summary-card { background: #fff; border-radius: 12px; padding: 20px; position: sticky; top: 20px; }
+    .btn-checkout { background-color: #e31837; color: #fff; border-radius: 8px; padding: 12px; font-weight: bold; width: 100%; border: none; }
+    .btn-voucher { background-color: #e31837; color: #fff; border-radius: 8px; margin-bottom: 10px; width: 100%; border: none; padding: 8px; }
+    .price-original { text-decoration: line-through; color: #999; font-size: 12px; }
+    .price-current { color: #333; font-weight: bold; }
+</style>
+
+<div class="cart-container">
+    <div class="container">
+        <h3 class="mb-4">Giỏ hàng của bạn</h3>
+
+        <div class="row">
+            <div class="col-lg-8">
+                @if (Model != null && Model.Any())
+                {
+                    <div class="bg-white p-3 rounded-3 shadow-sm">
+                        @foreach (var item in Model)
+                        {
+                            <div class="cart-item d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <img src="@item.ImageUrl" class="product-img me-3" alt="@item.ProductName">
+                                    <div>
+                                        <h6 class="mb-0">@item.ProductName</h6>
+                                        <small class="text-muted">DVT: Đang cập nhật</small>
+                                    </div>
+                                </div>
+
+                                <div class="text-end">
+                                    <div class="price-current">@item.Price.ToString("N0") ₫</div>
+                                    <div class="d-flex align-items-center mt-2">
+                                        <div class="quantity-box me-2">
+                                            <form asp-action="UpdateQuantity" asp-controller="Cart" asp-area="Customer" method="post" style="display:inline;">
+                                                <input type="hidden" name="productId" value="@item.ProductId" />
+                                                <input type="hidden" name="delta" value="-1" />
+                                                <button type="submit" style="cursor:pointer;">-</button>
+                                            </form>
+
+                                            <input type="text" value="@item.Quantity" readonly style="width: 30px; text-align: center; border: none;">
+
+                                            <form asp-action="UpdateQuantity" asp-controller="Cart" asp-area="Customer" method="post" style="display:inline;">
+                                                <input type="hidden" name="productId" value="@item.ProductId" />
+                                                <input type="hidden" name="delta" value="1" />
+                                                <button type="submit" style="cursor:pointer;">+</button>
+                                            </form>
+
+                                        </div>
+                                        <form asp-action="UpdateQuantity" asp-controller="Cart" asp-area="Customer" method="post" style="display:inline;">
+                                            <input type="hidden" name="productId" value="@item.ProductId" />
+                                            <input type="hidden" name="delta" value="-999" />
+                                            <button type="submit" class="text-danger" style="background:none; border:none;">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="mt-3">
+                            <a href="#" class="text-primary text-decoration-none">Xóa giỏ hàng</a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">Giỏ hàng của bạn đang trống!</div>
+                }
+            </div>
+
+            <div class="col-lg-4">
+                <div class="summary-card shadow-sm">
+                    <h5>Tạm tính giỏ hàng</h5>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tạm tính sản phẩm</span>
+                        <span>@tamTinh.ToString("N0") ₫</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 text-danger">
+                        <span>Tiết kiệm được</span>
+                        <span>0 ₫</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Phí vận chuyển</span>
+                        <span>0 ₫</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Khuyến mãi</span>
+                        <span>0 ₫</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="fw-bold">Thanh tiền:</span>
+                        <div class="text-end">
+                            <h4 class="text-dark fw-bold mb-0">@tamTinh.ToString("N0") ₫</h4>
+                            <small class="text-muted">(Giá đã bao gồm VAT)</small>
+                        </div>
+                    </div>
+
+                    <button class="btn-voucher mb-2">
+                        <i class="bi bi-ticket-perforated"></i> Mã Giảm Giá
+                    </button>
+
+                    <a asp-area="Customer"
+                       asp-controller="Order"
+                       asp-action="Checkout"
+                       class="btn-checkout d-block text-center text-decoration-none">
+                        THANH TOÁN <br />
+                        <small>@tamTinh.ToString("N0") ₫</small>
+                    </a>
+
+                    <div class="mt-3 p-2 rounded bg-warning bg-opacity-10 border border-warning text-center">
+                        <small>🎁 Ưu đãi đặc biệt cho bạn</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

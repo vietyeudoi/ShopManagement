@@ -30,8 +30,14 @@ public partial class ShopManagementContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=LAPTOP-LBMRCB9C;Initial Catalog=ShopManagement;Integrated Security=True;Trust Server Certificate=True");
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlServer(
+                "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=ShopManagement;Integrated Security=True"
+            );
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -54,7 +60,8 @@ public partial class ShopManagementContext : DbContext
             entity.HasKey(e => e.OrderId).HasName("PK__Orders__C3905BCF5E93A67B");
 
             entity.Property(e => e.OrderDate).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Status).HasDefaultValue("Chờ xác nhận");
+            entity.Property(e => e.Status).HasConversion<string>().HasMaxLength(50);
+
 
             entity.HasOne(d => d.Customer).WithMany(p => p.Orders)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -81,6 +88,8 @@ public partial class ShopManagementContext : DbContext
             entity.HasKey(e => e.PaymentId).HasName("PK__Payments__9B556A389909468B");
 
             entity.Property(e => e.PaymentDate).HasDefaultValueSql("(getdate())");
+
+            entity.Property(p => p.PaymentStatus).HasConversion<string>().HasMaxLength(50);
 
             entity.HasOne(d => d.Order).WithOne(p => p.Payment).HasConstraintName("FK_Payments_Orders");
         });

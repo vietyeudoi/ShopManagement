@@ -1,0 +1,54 @@
+﻿@using Sieu_Thi_Mini.Models
+@using Sieu_Thi_Mini.Helpers
+@model List<Order>
+
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Quản lý đơn hàng";
+}
+
+<h2 class="mb-4">Quản lý đơn hàng</h2>
+
+<table class="table table-bordered table-hover align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>#</th>
+            <th>Khách hàng</th>
+            <th>Nhân viên</th>
+            <th>Ngày đặt</th>
+            <th class="text-end">Tổng tiền</th>
+            <th class="text-center">Trạng thái</th>
+            <th class="text-center">Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>@order.OrderId</td>
+                <td>@order.Customer?.FullName</td>
+                <td>@order.User?.FullName</td>
+                <td>
+                    @(order.OrderDate?.ToString("dd/MM/yyyy HH:mm"))
+                </td>
+                <td class="text-end fw-bold text-danger">
+                    @order.TotalAmount.ToString("N0") đ
+                </td>
+                <td class="text-center">
+                    <span class="badge @order.Status.ToBadge()">
+                        @order.Status.ToVietnamese()
+                    </span>
+                </td>
+                <td class="text-center">
+                    <a asp-area="Admin"
+                       asp-controller="Order"
+                       asp-action="Details"
+                       asp-route-id="@order.OrderId"
+                       class="btn btn-sm btn-primary">
+                        Chi tiết
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

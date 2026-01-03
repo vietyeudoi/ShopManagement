@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Sieu_Thi_Mini.Areas.Admin.Controllers;
 using Sieu_Thi_Mini.Models;
 using System;
 
 [Area("Admin")]
 [Route("admin/product")]
-public class ProductController : Controller
+public class ProductController : BaseAdminController
 {
     private readonly ShopManagementContext _context;
     private readonly IWebHostEnvironment _env;
@@ -18,7 +19,6 @@ public class ProductController : Controller
     }
 
     [HttpGet("")]
-    [HttpGet("index")]
     public async Task<IActionResult> Index()
     {
         var products = await _context.Products
@@ -28,9 +28,7 @@ public class ProductController : Controller
         return View(products);
     }
 
-    // ================= CREATE =================
 
-    // ================= CREATE =================
     [HttpGet("create")]
     public IActionResult Create()
     {
@@ -48,7 +46,6 @@ public class ProductController : Controller
             return View(product);
         }
 
-        // ===== UPLOAD IMAGE =====
         if (ImageFile != null && ImageFile.Length > 0)
         {
             string uploadFolder = Path.Combine(_env.WebRootPath, "upload");
@@ -64,7 +61,7 @@ public class ProductController : Controller
                 ImageFile.CopyTo(stream);
             }
 
-            product.ImageUrl = fileName; // 🔴 lưu TÊN FILE vào DB
+            product.ImageUrl = fileName; 
         }
 
         product.CreatedAt = DateTime.Now;
@@ -76,9 +73,6 @@ public class ProductController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-
-
-    // ================= EDIT =================
 
     [HttpGet("edit/{id}")]
     public IActionResult Edit(int id)
