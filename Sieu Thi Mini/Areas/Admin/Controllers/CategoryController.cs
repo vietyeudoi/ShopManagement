@@ -37,12 +37,25 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
         [Route("create")]
         public IActionResult Create(Category model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                model.IsActive = true;
+                var errors = ModelState.Values.SelectMany(v => v.Errors);
+                foreach (var error in errors)
+                {
+                    Console.WriteLine("LỖI VALIDATION: " + error.ErrorMessage);
+                }
+                return View(model); 
+            }
+
+            try
+            {
                 _context.Categories.Add(model);
                 _context.SaveChanges();
                 return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Lỗi Database: " + ex.Message);
             }
             return View(model);
         }
@@ -58,8 +71,9 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
 
         [HttpPost]
         [Route("edit/{id}")]
-        public IActionResult Edit(Category model)
+        public IActionResult Edit(int id, Category model)
         {
+            if (id != model.CategoryId) return NotFound();
             if (ModelState.IsValid)
             {
                 _context.Categories.Update(model);

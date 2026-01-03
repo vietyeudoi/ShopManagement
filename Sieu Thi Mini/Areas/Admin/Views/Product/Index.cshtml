@@ -33,10 +33,14 @@
         <td>
             @if (!string.IsNullOrEmpty(item.ImageUrl))
             {
-                <img src="~/upload/@item.ImageUrl"
+                <img src="~/images/product/@item.ImageUrl"
                      width="60" height="60"
                      style="object-fit:cover" />
             }
+             else
+             {
+                 <img src="~/images/no-image.png" width="60" height="60" class="rounded border" />
+             }
         </td>
 
         <td>@item.ProductName</td>
