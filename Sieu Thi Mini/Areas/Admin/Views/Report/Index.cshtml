@@ -1,0 +1,71 @@
+﻿@model IEnumerable<Sieu_Thi_Mini.Models.Order>
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Báo cáo doanh thu";
+}
+
+<h3 class="mb-4">Báo cáo hệ thống</h3>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white shadow-sm">
+            <div class="card-body">
+                <h6>Tổng doanh thu</h6>
+                <h4>@ViewBag.TotalRevenue.ToString("N0") VNĐ</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white shadow-sm">
+            <div class="card-body">
+                <h6>Đơn hàng</h6>
+                <h4>@ViewBag.TotalOrders</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white shadow-sm">
+            <div class="card-body">
+                <h6>Sản phẩm</h6>
+                <h4>@ViewBag.TotalProducts</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white shadow-sm">
+            <div class="card-body">
+                <h6>Khách hàng</h6>
+                <h4>@ViewBag.TotalUsers</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Đơn hàng mới nhất</h5>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Mã ĐH</th>
+                    <th>Khách hàng</th>
+                    <th>Ngày đặt</th>
+                    <th>Tổng tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>#@item.OrderId</td>
+                        <td>@item.User?.FullName</td>
+                        <td>@item.OrderDate?.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="text-danger">@item.TotalAmount.ToString("N0") đ</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

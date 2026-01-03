@@ -1,0 +1,64 @@
+﻿@model IEnumerable<Sieu_Thi_Mini.Models.User>
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Quản lý người dùng";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Danh sách người dùng</h3>
+    <a asp-area="Admin" asp-controller="User" asp-action="Create" class="btn btn-primary">
+        + Thêm người dùng mới
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Quyền</th>
+                    <th class="text-center">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.UserId</td>
+                        <td class="fw-bold">@item.FullName</td>
+                        <td>@item.Email</td>
+                        <td>@item.Phone</td>
+                        <td>
+                            @if (item.Role == "Admin") // Giả sử 1 là Admin
+                            {
+                                <span class="badge bg-danger">Quản trị viên</span>
+                            }
+                            else if (item.Role == "Staff")
+                            {
+                                <span class="badge bg-warning text-dark">Nhân viên</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info">Khách hàng</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <a asp-area="Admin" asp-controller="User" asp-action="Edit" asp-route-id="@item.UserId"
+                               class="btn btn-warning btn-sm">Sửa</a>
+
+                            <a asp-area="Admin" asp-controller="User" asp-action="Details" asp-route-id="@item.UserId"
+                               class="btn btn-info btn-sm text-white">Xem</a>
+
+                            <a asp-area="Admin" asp-controller="User" asp-action="Delete" asp-route-id="@item.UserId"
+                               class="btn btn-danger btn-sm" onclick="return confirm('Xóa người dùng này?')">Xóa</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
