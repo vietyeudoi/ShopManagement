@@ -13,10 +13,6 @@ namespace Sieu_Thi_Mini.Areas.Customer.Controllers
 
         public IActionResult Index()
         {
-            if (HttpContext.Session.GetString("Role") == "Customer")
-            {
-                ViewData["Layout"] = "_LayoutCustomer";
-            }
             var cart = HttpContext.Session.GetObject<List<CartItem>>(CART_KEY)
                        ?? new List<CartItem>();
             return View(cart);

@@ -44,6 +44,8 @@ public partial class Order
     [InverseProperty("Order")]
     public virtual Payment? Payment { get; set; }
 
+    public string? Address { get; set; }
+
     [ForeignKey("UserId")]
     [InverseProperty("Orders")]
     public virtual User User { get; set; } = null!;

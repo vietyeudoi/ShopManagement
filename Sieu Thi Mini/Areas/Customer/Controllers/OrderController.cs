@@ -23,57 +23,136 @@ namespace Sieu_Thi_Mini.Areas.Customer.Controllers
         // GET: /Customer/Order/Checkout
         public IActionResult Checkout()
         {
-            var customerId = HttpContext.Session.GetInt32("CustomerId");
-
-            if (customerId == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
             var cart = HttpContext.Session.GetObject<List<CartItem>>(CART_KEY);
             if (cart == null || !cart.Any())
                 return RedirectToAction("Index", "Cart");
 
+            var customerId = HttpContext.Session.GetInt32("CustomerId");
+            if (customerId == null)
+                return RedirectToAction("Login", "Account");
+
+            var customer = _context.Customers.Find(customerId);
+            if (customer == null)
+                return RedirectToAction("Login", "Account");
+
+            customer.LoadAdress();
+
+            ViewBag.Customer = customer;
+
             return View(cart);
         }
 
+
         // POST: /Customer/Order/Checkout
+        //[HttpPost]
+        //public IActionResult Checkout(Sieu_Thi_Mini.Models.Customer customer, OrderStatus OrderStatus, PaymentStatusEnum paymentStatus , PaymentMethodEnum paymentMethod)
+        //{
+        //    var cart = HttpContext.Session.GetObject<List<CartItem>>(CART_KEY);
+        //    if (cart == null || !cart.Any()) return RedirectToAction("Index", "Cart");
+
+        //    // 1. Lưu hoặc xử lý thông tin khách hàng
+        //    customer.Password = "checkout_guest"; // Mật khẩu mặc định cho khách vãng lai
+        //    customer.IsActive = true;
+        //    _context.Customers.Add(customer);
+        //    _context.SaveChanges();
+
+        //    // 2. Tạo đơn hàng (Lưu Ghi chú vào Status hoặc xử lý riêng nếu bạn có cột Note)
+        //    var order = new Order
+        //    {
+        //        CustomerId = customer.CustomerId,
+        //        UserId = 1, // Tạm thời để mặc định, sau này thay bằng User.Identity
+        //        TotalAmount = cart.Sum(c => c.Total),
+        //        OrderDate = DateTime.Now,
+        //        // Nếu bảng Order chưa có cột Ghi chú, tạm lưu vào Status hoặc bạn có thể bỏ qua
+        //        Status = OrderStatus
+        //    };
+
+        //    _context.Orders.Add(order);
+        //    _context.SaveChanges(); // Sau dòng này, order.OrderId sẽ được cập nhật từ DB
+
+        //    // 3. Lưu Phương thức thanh toán vào bảng Payment
+        //    var paymentEntry = new Payment
+        //    {
+        //        OrderId = order.OrderId, // Sử dụng ID vừa tạo
+        //        PaymentMethod = paymentMethod, // Nhận giá trị "COD" hoặc "Bank" từ Form
+        //        PaymentDate = DateTime.Now,
+        //        PaymentStatus = paymentStatus
+        //    };
+        //    _context.Payments.Add(paymentEntry);
+
+        //    // 4. Lưu chi tiết đơn hàng
+        //    foreach (var item in cart)
+        //    {
+        //        _context.OrderDetails.Add(new OrderDetail
+        //        {
+        //            OrderId = order.OrderId,
+        //            ProductId = item.ProductId,
+        //            Quantity = item.Quantity,
+        //            UnitPrice = item.Price
+        //        });
+        //    }
+
+        //    _context.SaveChanges();
+
+        //    // 5. Xóa giỏ hàng sau khi đặt thành công
+        //    HttpContext.Session.Remove(CART_KEY);
+
+        //    // QUAN TRỌNG: Truyền order.OrderId vào tham số của trang Success
+        //    return RedirectToAction("Success", new { id = order.OrderId });
+        //}
+
         [HttpPost]
-        public IActionResult Checkout(Sieu_Thi_Mini.Models.Customer customer, OrderStatus OrderStatus, PaymentStatusEnum paymentStatus , PaymentMethodEnum paymentMethod)
+        [Area("Customer")]
+        public IActionResult Checkout(OrderStatus orderStatus,
+                              PaymentMethodEnum paymentMethod, string ShippingAddress)
         {
             var cart = HttpContext.Session.GetObject<List<CartItem>>(CART_KEY);
-            if (cart == null || !cart.Any()) return RedirectToAction("Index", "Cart");
+            if (cart == null || !cart.Any())
+                return RedirectToAction("Index", "Cart");
 
-            // 1. Lưu hoặc xử lý thông tin khách hàng
-            customer.Password = "checkout_guest"; // Mật khẩu mặc định cho khách vãng lai
-            customer.IsActive = true;
-            _context.Customers.Add(customer);
-            _context.SaveChanges();
+            var customerId = HttpContext.Session.GetInt32("CustomerId");
+            if (customerId == null)
+                return RedirectToAction("Login", "Account");
 
-            // 2. Tạo đơn hàng (Lưu Ghi chú vào Status hoặc xử lý riêng nếu bạn có cột Note)
+            var customer = _context.Customers.Find(customerId);
+            if (customer == null)
+                return RedirectToAction("Login", "Account");
+
+            customer.LoadAdress();
+            var address = customer.ListAdress.FirstOrDefault();
+
+            // ❌ CHẶN nếu thiếu thông tin
+            if (string.IsNullOrEmpty(customer.FullName)
+                || string.IsNullOrEmpty(customer.Phone)
+                || string.IsNullOrEmpty(address))
+            {
+                return Redirect("/Customer/Profile");
+            }
+
+            // 1️⃣ TẠO ORDER
             var order = new Order
             {
                 CustomerId = customer.CustomerId,
-                UserId = 1, // Tạm thời để mặc định, sau này thay bằng User.Identity
-                TotalAmount = cart.Sum(c => c.Total),
+                UserId = 1,
                 OrderDate = DateTime.Now,
-                // Nếu bảng Order chưa có cột Ghi chú, tạm lưu vào Status hoặc bạn có thể bỏ qua
-                Status = OrderStatus
-            };
+                TotalAmount = cart.Sum(c => c.Total),
+                Status = orderStatus,
+                Address = ShippingAddress
 
+            };
             _context.Orders.Add(order);
-            _context.SaveChanges(); // Sau dòng này, order.OrderId sẽ được cập nhật từ DB
+            _context.SaveChanges();
 
-            // 3. Lưu Phương thức thanh toán vào bảng Payment
-            var paymentEntry = new Payment
+            // 2️⃣ PAYMENT
+            _context.Payments.Add(new Payment
             {
-                OrderId = order.OrderId, // Sử dụng ID vừa tạo
-                PaymentMethod = paymentMethod, // Nhận giá trị "COD" hoặc "Bank" từ Form
-                PaymentDate = DateTime.Now,
-                PaymentStatus = paymentStatus
-            };
-            _context.Payments.Add(paymentEntry);
+                OrderId = order.OrderId,
+                PaymentMethod = paymentMethod,
+                PaymentStatus = PaymentStatusEnum.Pending,
+                PaymentDate = DateTime.Now
+            });
 
-            // 4. Lưu chi tiết đơn hàng
+            // 3️⃣ ORDER DETAIL
             foreach (var item in cart)
             {
                 _context.OrderDetails.Add(new OrderDetail
@@ -87,12 +166,11 @@ namespace Sieu_Thi_Mini.Areas.Customer.Controllers
 
             _context.SaveChanges();
 
-            // 5. Xóa giỏ hàng sau khi đặt thành công
             HttpContext.Session.Remove(CART_KEY);
 
-            // QUAN TRỌNG: Truyền order.OrderId vào tham số của trang Success
             return RedirectToAction("Success", new { id = order.OrderId });
         }
+
 
         // GET: /Customer/Order/Success?id=xxx
         public IActionResult Success(int id)

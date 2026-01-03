@@ -1,0 +1,110 @@
+﻿@model List<Sieu_Thi_Mini.Models.Product>
+@{
+    var categories = ViewBag.Categories as List<Sieu_Thi_Mini.Models.Category>;
+    int? currentCategory = ViewBag.CategoryId;
+    string keyword = ViewBag.Keyword as string;
+    Layout = ViewData["Layout"]?.ToString() ?? "_Layout";
+}
+
+<div class="row">
+
+    <!-- BÊN TRÁI: DANH MỤC -->
+    <div class="col-md-3">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-danger text-white">
+                Danh mục
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item @(ViewBag.CategoryId == null ? "active" : "")">
+                    <a class="text-decoration-none d-block @(ViewBag.CategoryId == null ? "text-white" : "")"
+                       asp-action="Search">
+                        Tất cả
+                    </a>
+                </li>
+
+                @foreach (var c in categories)
+                {
+                    <li class="list-group-item @(ViewBag.CategoryId == c.CategoryId ? "active" : "")">
+                        <a class="text-decoration-none d-block @(ViewBag.CategoryId == c.CategoryId ? "text-white" : "")"
+                           asp-action="Search"
+                           asp-route-categoryId="@c.CategoryId">
+                            @c.CategoryName
+                        </a>
+                    </li>
+                }
+            </ul>
+
+        </div>
+    </div>
+
+    <!-- BÊN PHẢI: KẾT QUẢ -->
+    <div class="col-md-9">
+
+        <h5 class="mb-3">
+            Kết quả tìm kiếm
+            @if (!string.IsNullOrEmpty(keyword))
+            {
+                <span class="text-muted">: "@keyword"</span>
+            }
+        </h5>
+
+        @if (!Model.Any())
+        {
+            <div class="alert alert-warning">
+                Không tìm thấy sản phẩm
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                @foreach (var p in Model)
+                {
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 shadow-sm">
+
+                            <!-- CLICK ẢNH → XEM CHI TIẾT -->
+                            <a asp-controller="Home"
+                               asp-action="Details"
+                               asp-route-id="@p.ProductId"
+                               class="text-decoration-none">
+                                @if (!string.IsNullOrEmpty(p.ImageUrl))
+                                {
+                                    <img src="~/upload/@p.ImageUrl"
+                                         class="card-img-top"
+                                         style="height:180px; object-fit:cover" />
+                                }
+                                else
+                                {
+                                    <img src="~/images/no-image.png"
+                                         class="card-img-top"
+                                         style="height:180px; object-fit:cover" />
+                                }
+                            </a>
+
+                            <div class="card-body text-center">
+                                <h6 class="card-title">@p.ProductName</h6>
+
+                                <p class="text-danger fw-bold mb-2">
+                                    @p.Price.ToString("N0") đ
+                                </p>
+
+                                <!-- THÊM VÀO GIỎ -->
+                                <form asp-area="Customer"
+                                      asp-controller="Cart"
+                                      asp-action="Add"
+                                      method="post">
+                                    <input type="hidden" name="id" value="@p.ProductId" />
+                                    <button type="submit" class="btn btn-sm btn-danger w-100">
+                                        <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+        }
+    </div>
+
+</div>

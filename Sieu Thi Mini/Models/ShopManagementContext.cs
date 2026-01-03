@@ -92,6 +92,11 @@ public partial class ShopManagementContext : DbContext
             entity.Property(p => p.PaymentStatus).HasConversion<string>().HasMaxLength(50);
 
             entity.HasOne(d => d.Order).WithOne(p => p.Payment).HasConstraintName("FK_Payments_Orders");
+
+            entity.Property(e => e.PaymentMethod).HasConversion<string>().HasMaxLength(50);
+
+            entity.Property(e => e.PaymentStatus).HasConversion<string>().HasMaxLength(50);
+
         });
 
         modelBuilder.Entity<Product>(entity =>

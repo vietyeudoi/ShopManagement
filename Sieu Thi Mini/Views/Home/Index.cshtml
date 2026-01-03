@@ -3,38 +3,84 @@
 
 @{
     Layout = ViewData["Layout"]?.ToString() ?? "_Layout";
-    ViewData["Title"] = "Home";
+    ViewData["Title"] = "Trang chủ";
+
+    var categories = ViewBag.Categories as List<Category>;
+    int? activeCategory = ViewBag.CategoryId;
 }
 
-<h2>Product List</h2>
-
 <div class="row">
-    @foreach (var p in Model)
-    {
-        <div class="col-md-3 mb-4">
-            <div class="card h-100">
-                <img src="@p.ImageUrl" class="card-img-top" alt="@p.ProductName" />
 
-                <div class="card-body">
-                    <h5 class="card-title">@p.ProductName</h5>
-                    <p class="card-text">
-                        Price: <strong>@p.Price.ToString("N0")</strong> VND
-                    </p>
-                    <p>
-                        Stock: @p.Stock
-                    </p>
-                </div>
+    <!-- ========== DANH MỤC BÊN TRÁI ========== -->
+    <div class="col-md-3">
+        <div class="list-group shadow-sm">
 
-                <div class="card-footer text-center">
-                    <a asp-area ="Customer"
-                        asp-controller="Cart"
-                       asp-action="Add"
-                       asp-route-id="@p.ProductId"
-                       class="btn btn-primary">
-                        Add to Cart
-                    </a>
-                </div>
-            </div>
+            <a asp-action="Index"
+               class="list-group-item list-group-item-action
+               @(activeCategory == null ? "active" : "")">
+                Tất cả sản phẩm
+            </a>
+
+            @foreach (var c in categories)
+            {
+                <a asp-action="Index"
+                   asp-route-categoryId="@c.CategoryId"
+                   class="list-group-item list-group-item-action
+                       @(activeCategory == c.CategoryId ? "active" : "")">
+                    @c.CategoryName
+                </a>
+            }
         </div>
-    }
+    </div>
+
+    <!-- ========== SẢN PHẨM BÊN PHẢI ========== -->
+    <div class="col-md-9">
+
+        @if (!Model.Any())
+        {
+            <div class="alert alert-warning">
+                Không có sản phẩm trong danh mục này
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                @foreach (var p in Model)
+                {
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 shadow-sm">
+
+                            <!-- CLICK ẢNH => DETAILS -->
+                            <a asp-controller="Home"
+                               asp-action="Details"
+                               asp-route-id="@p.ProductId">
+                                <img src="~/upload/@p.ImageUrl"
+                                     class="card-img-top"
+                                     style="height:180px; object-fit:cover" />
+                            </a>
+
+                            <div class="card-body text-center">
+                                <h6>@p.ProductName</h6>
+
+                                <p class="text-danger fw-bold">
+                                    @p.Price.ToString("N0") đ
+                                </p>
+                            </div>
+
+                            <div class="card-footer bg-white text-center">
+                                <a asp-area="Customer"
+                                   asp-controller="Cart"
+                                   asp-action="Add"
+                                   asp-route-id="@p.ProductId"
+                                   class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
 </div>

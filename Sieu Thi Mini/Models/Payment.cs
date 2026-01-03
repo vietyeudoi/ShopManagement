@@ -21,7 +21,7 @@ public partial class Payment
         {
         COD,
         Bank,
-        Cash
+        Cash,
         
         }
 

@@ -70,6 +70,12 @@
                 @if (Model.Payment != null)
                 {
                     <p>
+                        <strong>Phương thức thanh toán:</strong>
+                        <span class="badge bg-info">
+                            @Model.Payment.PaymentMethod
+                        </span>
+                    </p>
+                    <p>
                         <strong>Trạng thái:</strong>
                         <span class="badge @Model.Payment.PaymentStatus.ToBadge()">
                             @Model.Payment.PaymentStatus.ToVietnamese()
