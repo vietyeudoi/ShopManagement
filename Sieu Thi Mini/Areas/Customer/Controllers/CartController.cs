@@ -2,6 +2,7 @@
 using Sieu_Thi_Mini.Models;
 using Sieu_Thi_Mini.Helpers;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.Filters;
 using System.Linq;
 
 namespace Sieu_Thi_Mini.Areas.Customer.Controllers
@@ -9,6 +10,22 @@ namespace Sieu_Thi_Mini.Areas.Customer.Controllers
     [Area("Customer")]
     public class CartController : Controller
     {
+        public override void OnActionExecuting(
+    Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext context)
+        {
+            var role = HttpContext.Session.GetString("Role");
+
+            if (role == "Customer" || role == "Admin")
+            {
+                ViewData["Layout"] = "_LayoutCustomer";
+            }
+            else
+            {
+                ViewData["Layout"] = "_Layout";
+            }
+
+            base.OnActionExecuting(context);
+        }
         private const string CART_KEY = "CART";
 
         public IActionResult Index()

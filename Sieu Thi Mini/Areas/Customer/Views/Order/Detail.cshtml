@@ -1,6 +1,8 @@
 ﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
+@using Sieu_Thi_Mini.Models
+@using Sieu_Thi_Mini.Helpers
 @model List<Sieu_Thi_Mini.Models.OrderDetail>
 
 @{
@@ -34,7 +36,9 @@
                 <p class="text-muted mb-0 small">Ngày đặt: @order?.OrderDate?.ToString("dd/MM/yyyy HH:mm")</p>
             </div>
             <div>
-                <span class="badge order.Status.ToBadge()">">order.status.ToVietNam()</span>
+                <span class="badge @(order?.Status.ToBadge())">
+                    @order?.Status.ToVietnamese()
+                </span>
             </div>
         </div>
 
@@ -54,6 +58,29 @@
                         <div class="info-label">Địa chỉ</div>
                         <div class="info-value">@order?.Address</div>
                     </div>
+                    <div class="mb-3">
+                        <div>
+                            Phương thức thanh toán:  <div class="badge bg-info">@order.Payment.PaymentMethod</div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span>Trạng thái thanh toán:</span>
+                            <span class="badge @order.Payment?.PaymentStatus.ToBadge()">
+                                @order.Payment?.PaymentStatus.ToVietnamese()
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span>Trạng thái đơn hàng:</span>
+                            <span class="badge @order.Status.ToBadge()">
+                                @order.Status.ToVietnamese()
+                            </span>
+                        </div>
+                    </div>
+
                     @* <div class="mb-0">
                         <div class="info-label">Ghi chú</div>
                         <div class="info-value text-muted italic" style="font-weight: 400;">

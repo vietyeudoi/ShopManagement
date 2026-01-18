@@ -3,22 +3,25 @@
     ViewData["Title"] = "Đăng nhập";
 }
 
-<div class="auth-wrapper">
-    <div class="auth-box">
-
-        <h3 class="auth-title">Đăng nhập</h3>
+<div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
+    <div class="card shadow-lg p-4" style="width: 100%; max-width: 400px;">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold">🔑 Đăng nhập</h3>
+            <p class="text-muted mb-0">Nhập thông tin tài khoản của bạn</p>
+        </div>
 
         @if (ViewBag.Error != null)
         {
             <div class="alert alert-danger">
-                @ViewBag.Error
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>@ViewBag.Error
             </div>
         }
 
         <form asp-action="Login" asp-controller="Account" method="post">
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
 
-            <div class="form-group mb-3">
-                <label>Email</label>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Email</label>
                 <input name="email"
                        type="email"
                        class="form-control"
@@ -26,8 +29,8 @@
                        required />
             </div>
 
-            <div class="form-group mb-3">
-                <label>Mật khẩu</label>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Mật khẩu</label>
                 <input name="password"
                        type="password"
                        class="form-control"
@@ -35,17 +38,29 @@
                        required />
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">
+            <button type="submit" class="btn btn-primary w-100 fw-bold">
                 Đăng nhập
             </button>
         </form>
 
-        <div class="auth-link">
-            <span>Chưa có tài khoản?</span>
-            <a asp-action="Register" asp-controller="Account">
-                Đăng ký
-            </a>
+        <div class="text-center mt-3">
+            <span class="text-muted">Chưa có tài khoản?</span>
+            <a asp-action="Register" asp-controller="Account" class="fw-bold ms-1">Đăng ký</a>
         </div>
-
     </div>
 </div>
+
+<style>
+    .bg-light {
+        background-color: #f8f9fa;
+    }
+
+    input.form-control {
+        height: 45px;
+    }
+
+    button.btn {
+        height: 45px;
+    }
+
+</style>

@@ -8,8 +8,6 @@ using static Sieu_Thi_Mini.Models.Order;
 namespace Sieu_Thi_Mini.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    //[Authorize(Roles = "Admin")]
-    [Route("admin/Order")]
     public class OrderController : BaseAdminController
     {
         private readonly ShopManagementContext _context;
@@ -18,33 +16,59 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
         {
             _context = context;
         }
-        public IActionResult index()
+        public IActionResult Index()
         {
-            var orders = _context.Orders.Include(o => o.User).Include(o => o.Customer).ToList();
+            var orders = _context.Orders.Include(o => o.User).Include(o => o.Customer).OrderByDescending(o => o.OrderDate).ToList();
             return View(orders);
         }
 
-        [HttpGet("Details")]
-        public IActionResult Details(int id)
+        //public IActionResult Details(int id)
+        //{
+        //    var order = _context.Orders
+        //        .Include(o => o.User)
+        //        .Include(o => o.Customer)
+        //        .Include(o => o.OrderDetails)
+        //        .ThenInclude(od => od.Product)
+        //        .FirstOrDefault(o => o.OrderId == id);
+
+        //    if (order == null)
+        //        return NotFound();
+
+        //    // Lấy thông tin thanh toán
+        //    var payment = _context.Payments.FirstOrDefault(p => p.OrderId == id);
+        //    ViewBag.Payment = payment;
+
+        //    return View(order);
+        //}
+
+
+        public IActionResult Details(string id)  // Đổi từ int sang string
         {
+            // Parse string sang int
+            if (!int.TryParse(id, out int orderId))
+            {
+                return BadRequest("Invalid order ID");
+            }
+
             var order = _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.Customer)
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Product)
-                .FirstOrDefault(o => o.OrderId == id);
+                .FirstOrDefault(o => o.OrderId == orderId);
 
             if (order == null)
                 return NotFound();
 
             // Lấy thông tin thanh toán
-            var payment = _context.Payments.FirstOrDefault(p => p.OrderId == id);
+            var payment = _context.Payments.FirstOrDefault(p => p.OrderId == orderId);
             ViewBag.Payment = payment;
 
             return View(order);
         }
 
-        [HttpPost("change-status")]
+
+        [HttpPost]
         public IActionResult ChangeStatus(int orderId, OrderStatus status)
         {
             var order = _context.Orders.Find(orderId);

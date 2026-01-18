@@ -4,78 +4,604 @@
     Layout = ViewData["Layout"]?.ToString() ?? "_Layout";
     var related = ViewBag.RelatedProducts as List<Sieu_Thi_Mini.Models.Product>;
 }
-<div class="row mb-5">
-    <div class="col-md-5">
-        <img src="~/upload/@Model.ImageUrl"
-             class="img-fluid rounded shadow-sm"
-             style="width:100%; object-fit:cover" />
-    </div>
 
-    <div class="col-md-7">
-        <h3 class="fw-bold">@Model.ProductName</h3>
+<style>
+    :root {
+        --primary: #e63946;
+        --primary-dark: #d00000;
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+        --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-        <p class="text-muted">
-            Danh mục: <strong>@Model.Category?.CategoryName</strong>
-        </p>
+    /* ========== BREADCRUMB ========== */
+    .custom-breadcrumb {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #f0f0f0;
+        margin-bottom: 2rem;
+    }
 
-        <h4 class="text-danger fw-bold">
-            @Model.Price.ToString("N0") đ
-        </h4>
+    .breadcrumb-item a {
+        color: #6c757d;
+        text-decoration: none;
+        transition: var(--transition);
+    }
 
-        <p class="mt-3">
-            @Model.Description
-        </p>
+        .breadcrumb-item a:hover {
+            color: var(--primary);
+        }
 
-        <!-- THÊM VÀO GIỎ -->
-        <form asp-area="Customer"
-              asp-controller="Cart"
-              asp-action="Add"
-              method="post"
-              class="mt-4">
-            <input type="hidden" name="id" value="@Model.ProductId" />
-            <button class="btn btn-danger btn-lg">
-                <i class="bi bi-cart-plus"></i> Thêm vào giỏ
-            </button>
-        </form>
-    </div>
-</div>
-@if (related != null && related.Any())
-{
-    <h4 class="mb-3">Sản phẩm tương tự</h4>
+    .breadcrumb-item.active {
+        color: var(--primary);
+        font-weight: 600;
+    }
 
-    <div class="row">
-        @foreach (var p in related)
-        {
-            <div class="col-md-3 mb-3">
-                <div class="card h-100 shadow-sm">
+    /* ========== PRODUCT DETAIL SECTION ========== */
+    .product-detail-section {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 3rem;
+    }
 
-                    <a asp-controller="Product"
-                       asp-action="Details"
-                       asp-route-id="@p.ProductId">
-                        <img src="~/upload/@p.ImageUrl"
-                             class="card-img-top"
-                             style="height:160px; object-fit:cover" />
-                    </a>
+    /* ========== IMAGE GALLERY ========== */
+    .product-image-container {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #f8f9fa;
+        box-shadow: var(--shadow-md);
+        aspect-ratio: 1;
+    }
 
-                    <div class="card-body text-center">
-                        <h6 class="card-title">@p.ProductName</h6>
+    .product-main-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+        cursor: zoom-in;
+    }
 
-                        <p class="text-danger fw-bold">
-                            @p.Price.ToString("N0") đ
-                        </p>
+        .product-main-image:hover {
+            transform: scale(1.05);
+        }
 
-                        <form asp-area="Customer"
-                              asp-controller="Cart"
-                              asp-action="Add"
-                              method="post">
-                            <input type="hidden" name="id" value="@p.ProductId" />
-                            <button class="btn btn-sm btn-outline-danger w-100">
-                                Thêm vào giỏ
-                            </button>
-                        </form>
+    .product-badge-detail {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.9375rem;
+        box-shadow: var(--shadow-lg);
+        z-index: 2;
+    }
+
+    .badge-new {
+        background: linear-gradient(135deg, #00b894, #00cec9);
+        color: white;
+    }
+
+    .badge-sale {
+        background: linear-gradient(135deg, #ff6348, #ff4757);
+        color: white;
+    }
+
+    /* ========== PRODUCT INFO ========== */
+    .product-info-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .product-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #212529;
+        line-height: 1.3;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-meta {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .category-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, rgba(230, 57, 70, 0.1), rgba(230, 57, 70, 0.05));
+        color: var(--primary);
+        padding: 0.5rem 1.25rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9375rem;
+    }
+
+    .stock-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, rgba(0, 184, 148, 0.1), rgba(0, 206, 201, 0.05));
+        color: #00b894;
+        padding: 0.5rem 1.25rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9375rem;
+    }
+
+    .product-price-section {
+        background: linear-gradient(135deg, rgba(230, 57, 70, 0.05), rgba(230, 57, 70, 0.02));
+        padding: 1.5rem;
+        border-radius: 16px;
+        border: 2px solid rgba(230, 57, 70, 0.1);
+    }
+
+    .product-price {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin: 0;
+    }
+
+    .price-label {
+        color: #6c757d;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-description {
+        color: #495057;
+        line-height: 1.8;
+        font-size: 1rem;
+    }
+
+    .product-features {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+
+    .feature-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: 10px;
+        color: var(--primary);
+        font-size: 1.25rem;
+    }
+
+    .feature-label {
+        color: #6c757d;
+        font-weight: 500;
+        min-width: 120px;
+    }
+
+    .feature-value {
+        color: #212529;
+        font-weight: 600;
+    }
+
+    /* ========== ADD TO CART SECTION ========== */
+    .add-to-cart-section {
+        background: #f8f9fa;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+
+    .btn-add-to-cart {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border: none;
+        border-radius: 50px;
+        padding: 1.125rem 3rem;
+        color: white;
+        font-weight: 700;
+        font-size: 1.125rem;
+        box-shadow: var(--shadow-lg);
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+        .btn-add-to-cart:hover {
+            background: linear-gradient(135deg, var(--primary-dark), #b00000);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(230, 57, 70, 0.3);
+            color: white;
+        }
+
+        .btn-add-to-cart i {
+            font-size: 1.5rem;
+        }
+
+    /* ========== RELATED PRODUCTS ========== */
+    .related-section {
+        margin-top: 4rem;
+    }
+
+    .section-header {
+        position: relative;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+
+        .section-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), transparent);
+            border-radius: 2px;
+        }
+
+    .section-title {
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 1.75rem;
+        margin-bottom: 0;
+    }
+
+    /* ========== RELATED PRODUCT CARD ========== */
+    .related-product-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: var(--transition);
+        box-shadow: var(--shadow-sm);
+        height: 100%;
+        background: white;
+    }
+
+        .related-product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(230, 57, 70, 0.15);
+        }
+
+    .related-image-wrapper {
+        position: relative;
+        overflow: hidden;
+        background: #f8f9fa;
+        aspect-ratio: 1;
+    }
+
+    .related-product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .related-product-card:hover .related-product-image {
+        transform: scale(1.1);
+    }
+
+    .related-product-body {
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .related-product-title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 2.8em;
+        line-height: 1.4;
+    }
+
+        .related-product-title a {
+            color: #212529;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+            .related-product-title a:hover {
+                color: var(--primary);
+            }
+
+    .related-product-price {
+        color: var(--primary);
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+    }
+
+    .btn-add-related {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border: none;
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9375rem;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+        .btn-add-related:hover {
+            background: linear-gradient(135deg, var(--primary-dark), #b00000);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: white;
+        }
+
+    /* ========== RESPONSIVE ========== */
+    @@media (max-width: 991.98px) {
+        .product-title {
+            font-size: 1.5rem;
+        }
+
+        .product-price {
+            font-size: 2rem;
+        }
+
+        .product-detail-section {
+            padding: 1.5rem;
+        }
+    }
+
+    @@media (max-width: 575.98px) {
+        .product-title {
+            font-size: 1.25rem;
+        }
+
+        .product-price {
+            font-size: 1.75rem;
+        }
+
+        .btn-add-to-cart {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+        }
+
+        .product-detail-section {
+            padding: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+        }
+    }
+
+    /* ========== ANIMATIONS ========== */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .product-detail-section {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    .related-product-card {
+        animation: fadeInUp 0.5s ease-out backwards;
+    }
+
+        .related-product-card:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .related-product-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .related-product-card:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .related-product-card:nth-child(4) {
+            animation-delay: 0.2s;
+        }
+</style>
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb custom-breadcrumb mb-0">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">
+                <i class="bi bi-house-door-fill me-2"></i>Trang chủ
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index" asp-route-categoryId="@Model.CategoryId">
+                @Model.Category?.CategoryName
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            @Model.ProductName
+        </li>
+    </ol>
+</nav>
+
+<!-- Product Detail Section -->
+<div class="product-detail-section">
+    <div class="row g-4 g-lg-5">
+        <!-- Product Image -->
+        <div class="col-lg-5">
+            <div class="product-image-container">
+                <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "https://via.placeholder.com/600x600?text=No+Image" : Url.Content("~/upload/" + Model.ImageUrl))"
+                     class="product-main-image"
+                     alt="@Model.ProductName">
+
+                <!-- Optional Badge -->
+                <span class="product-badge-detail badge-new">
+                    <i class="bi bi-star-fill me-2"></i>Nổi bật
+                </span>
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="col-lg-7">
+            <div class="product-info-section">
+                <!-- Title -->
+                <div>
+                    <h1 class="product-title">@Model.ProductName</h1>
+
+                    <!-- Meta Info -->
+                    <div class="product-meta">
+                        <div class="category-badge">
+                            <i class="bi bi-tag-fill"></i>
+                            <span>@Model.Category?.CategoryName</span>
+                        </div>
+                        <div class="stock-badge">
+                            <i class="bi bi-box-seam-fill"></i>
+                            <span>Còn @Model.Stock sản phẩm</span>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Price Section -->
+                <div class="product-price-section">
+                    <div class="price-label">Giá sản phẩm:</div>
+                    <div class="product-price">@Model.Price.ToString("N0")₫</div>
+                </div>
+
+                <!-- Description -->
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div>
+                        <h5 class="fw-bold mb-3">Mô tả sản phẩm</h5>
+                        <p class="product-description">@Model.Description</p>
+                    </div>
+                }
+
+                <!-- Product Features -->
+                <div class="product-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div class="feature-label">Bảo hành:</div>
+                        <div class="feature-value">12 tháng</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="bi bi-truck"></i>
+                        </div>
+                        <div class="feature-label">Giao hàng:</div>
+                        <div class="feature-value">Toàn quốc</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </div>
+                        <div class="feature-label">Đổi trả:</div>
+                        <div class="feature-value">Trong 7 ngày</div>
+                    </div>
+                </div>
+
+                <!-- Add to Cart Section -->
+                <div class="add-to-cart-section">
+                    <form asp-area="Customer"
+                          asp-controller="Cart"
+                          asp-action="Add"
+                          method="post">
+                        <input type="hidden" name="id" value="@Model.ProductId" />
+                        <button type="submit" class="btn-add-to-cart">
+                            <i class="bi bi-cart-plus-fill"></i>
+                            <span>Thêm vào giỏ hàng</span>
+                        </button>
+                    </form>
+                </div>
             </div>
-        }
+        </div>
+    </div>
+</div>
+
+<!-- Related Products -->
+@if (related != null && related.Any())
+{
+    <div class="related-section">
+        <div class="section-header">
+            <h2 class="section-title">Sản phẩm tương tự</h2>
+        </div>
+
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-3 g-lg-4">
+            @foreach (var p in related)
+            {
+                <div class="col">
+                    <div class="related-product-card">
+                        <div class="related-image-wrapper">
+                            <a asp-controller="Home" asp-action="Details" asp-route-id="@p.ProductId">
+                                <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "https://via.placeholder.com/400x400?text=No+Image" : Url.Content("~/upload/" + p.ImageUrl))"
+                                     class="related-product-image"
+                                     alt="@p.ProductName"
+                                     loading="lazy">
+                            </a>
+                        </div>
+
+                        <div class="related-product-body">
+                            <h5 class="related-product-title">
+                                <a asp-controller="Home" asp-action="Details" asp-route-id="@p.ProductId">
+                                    @p.ProductName
+                                </a>
+                            </h5>
+
+                            <div class="related-product-price">@p.Price.ToString("N0")₫</div>
+
+                            <form asp-area="Customer"
+                                  asp-controller="Cart"
+                                  asp-action="Add"
+                                  method="post">
+                                <input type="hidden" name="id" value="@p.ProductId" />
+                                <button type="submit" class="btn-add-related">
+                                    <i class="bi bi-cart-plus"></i>
+                                    <span>Thêm vào giỏ</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
     </div>
 }

@@ -15,6 +15,8 @@ public partial class ShopManagementContext : DbContext
     {
     }
 
+    public virtual DbSet<Address> Addresses { get; set; }
+
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<Customer> Customers { get; set; }
@@ -30,21 +32,30 @@ public partial class ShopManagementContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
-        {
-            optionsBuilder.UseSqlServer(
-                "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=ShopManagement;Integrated Security=True"
-            );
-        }
-    }
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=ShopManagement;Integrated Security=True;Encrypt=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Address>(entity =>
+        {
+            entity.HasKey(e => e.AddressId).HasName("PK__Addresse__091C2AFBB30BE04C");
+
+            entity.Property(e => e.Address1)
+                .HasMaxLength(255)
+                .HasColumnName("Address");
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.Addresses)
+                .HasForeignKey(d => d.CustomerId)
+                .HasConstraintName("FK_Addresses_Customers");
+        });
+
         modelBuilder.Entity<Category>(entity =>
         {
             entity.HasKey(e => e.CategoryId).HasName("PK__Categori__19093A0BD443CA4E");
 
+            entity.Property(e => e.CategoryName).HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
 
@@ -52,22 +63,40 @@ public partial class ShopManagementContext : DbContext
         {
             entity.HasKey(e => e.CustomerId).HasName("PK__Customer__A4AE64D89AF009AA");
 
+            entity.HasIndex(e => e.Email, "UQ__Customer__A9D10534554E8A5C").IsUnique();
+
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.FullName).HasMaxLength(100);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.Password).HasMaxLength(255);
+            entity.Property(e => e.Phone).HasMaxLength(20);
         });
 
         modelBuilder.Entity<Order>(entity =>
         {
+            entity.ToTable("Orders");
             entity.HasKey(e => e.OrderId).HasName("PK__Orders__C3905BCF5E93A67B");
 
-            entity.Property(e => e.OrderDate).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Status).HasConversion<string>().HasMaxLength(50);
-
+            entity.Property(e => e.Address).HasMaxLength(255);
+            entity.Property(e => e.OrderDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Status)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Enum.Parse<Order.OrderStatus>(v)
+                )
+                .HasMaxLength(50)
+                .IsUnicode(true);
+            entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Customer).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.CustomerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Orders_Customers");
 
             entity.HasOne(d => d.User).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Orders_Users");
         });
@@ -76,9 +105,14 @@ public partial class ShopManagementContext : DbContext
         {
             entity.HasKey(e => e.OrderDetailId).HasName("PK__OrderDet__D3B9D36C71270372");
 
-            entity.HasOne(d => d.Order).WithMany(p => p.OrderDetails).HasConstraintName("FK_OrderDetails_Orders");
+            entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderDetails)
+                .HasForeignKey(d => d.OrderId)
+                .HasConstraintName("FK_OrderDetails_Orders");
 
             entity.HasOne(d => d.Product).WithMany(p => p.OrderDetails)
+                .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_OrderDetails_Products");
         });
@@ -87,26 +121,45 @@ public partial class ShopManagementContext : DbContext
         {
             entity.HasKey(e => e.PaymentId).HasName("PK__Payments__9B556A389909468B");
 
-            entity.Property(e => e.PaymentDate).HasDefaultValueSql("(getdate())");
+            entity.HasIndex(e => e.OrderId, "UQ__Payments__C3905BCE71CEF21F").IsUnique();
 
-            entity.Property(p => p.PaymentStatus).HasConversion<string>().HasMaxLength(50);
+            entity.Property(e => e.PaymentDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.PaymentMethod)
+              .HasConversion(
+                  v => v.ToString(),
+                  v => Enum.Parse<Payment.PaymentMethodEnum>(v)
+              )
+              .HasMaxLength(50)
+              .IsUnicode(true);
+            entity.Property(e => e.PaymentStatus)
+              .HasConversion(
+                  v => v.ToString(),
+                  v => Enum.Parse<Payment.PaymentStatusEnum>(v)
+              )
+              .HasMaxLength(50)
+              .IsUnicode(true);
 
-            entity.HasOne(d => d.Order).WithOne(p => p.Payment).HasConstraintName("FK_Payments_Orders");
-
-            entity.Property(e => e.PaymentMethod).HasConversion<string>().HasMaxLength(50);
-
-            entity.Property(e => e.PaymentStatus).HasConversion<string>().HasMaxLength(50);
-
+            entity.HasOne(d => d.Order).WithOne(p => p.Payment)
+                .HasForeignKey<Payment>(d => d.OrderId)
+                .HasConstraintName("FK_Payments_Orders");
         });
 
         modelBuilder.Entity<Product>(entity =>
         {
             entity.HasKey(e => e.ProductId).HasName("PK__Products__B40CC6CD9D7144A7");
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ImageUrl).HasMaxLength(255);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ProductName).HasMaxLength(150);
 
             entity.HasOne(d => d.Category).WithMany(p => p.Products)
+                .HasForeignKey(d => d.CategoryId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Products_Categories");
         });
@@ -115,7 +168,14 @@ public partial class ShopManagementContext : DbContext
         {
             entity.HasKey(e => e.UserId).HasName("PK__Users__1788CC4C6DDF70E3");
 
+            entity.HasIndex(e => e.Email, "UQ__Users__A9D10534F0D78D91").IsUnique();
+
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.FullName).HasMaxLength(100);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.Password).HasMaxLength(255);
+            entity.Property(e => e.Phone).HasMaxLength(20);
+            entity.Property(e => e.Role).HasMaxLength(50);
         });
 
         OnModelCreatingPartial(modelBuilder);

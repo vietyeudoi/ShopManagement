@@ -7,7 +7,6 @@ using System.Diagnostics;
 namespace Sieu_Thi_Mini.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Route("admin/category")]
     public class CategoryController : BaseAdminController
     {
         private readonly ShopManagementContext _context;
@@ -18,7 +17,6 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
         }
 
         // /admin/category
-        [Route("")]
         public IActionResult Index()
         {
             var categories = _context.Categories.ToList();
@@ -26,28 +24,38 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
         }
 
         // /admin/category/create
-        [Route("create")]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
-        [Route("create")]
         public IActionResult Create(Category model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                model.IsActive = true;
+                var errors = ModelState.Values.SelectMany(v => v.Errors);
+                foreach (var error in errors)
+                {
+                    Console.WriteLine("LỖI VALIDATION: " + error.ErrorMessage);
+                }
+                return View(model); 
+            }
+
+            try
+            {
                 _context.Categories.Add(model);
                 _context.SaveChanges();
                 return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Lỗi Database: " + ex.Message);
             }
             return View(model);
         }
 
         // /admin/category/edit/5
-        [Route("edit/{id}")]
         public IActionResult Edit(int id)
         {
             var category = _context.Categories.Find(id);
@@ -56,9 +64,9 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        [Route("edit/{id}")]
-        public IActionResult Edit(Category model)
+        public IActionResult Edit(int id, Category model)
         {
+            if (id != model.CategoryId) return NotFound();
             if (ModelState.IsValid)
             {
                 _context.Categories.Update(model);
@@ -69,7 +77,6 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
         }
 
         // Ẩn danh mục (không xóa cứng)
-        [Route("toggle/{id}")]
         public IActionResult Toggle(int id)
         {
             var category = _context.Categories.Find(id);
@@ -82,7 +89,6 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
         }
 
         // GET: admin/category/delete/5
-        [HttpGet("delete/{id}")]
         public IActionResult Delete(int id)
         {
             var category = _context.Categories
@@ -101,7 +107,6 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
         }
 
         // POST: admin/category/delete/5
-        [HttpPost("delete/{id}")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {

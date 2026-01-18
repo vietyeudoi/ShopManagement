@@ -1,0 +1,169 @@
+﻿@model IEnumerable<Sieu_Thi_Mini.Models.Customer>
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Quản lý khách hàng";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">
+            <i class="bi bi-people-fill me-2"></i>
+            Danh sách khách hàng
+        </h3>
+        <a asp-area="Admin"
+           asp-controller="Customer"
+           asp-action="Create"
+           class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>
+            Thêm khách hàng
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="60">ID</th>
+                            <th>Họ tên</th>
+                            <th>Email</th>
+                            <th width="120">Số điện thoại</th>
+                            <th width="250">Địa chỉ</th>
+                            <th width="100" class="text-center">Trạng thái</th>
+                            <th width="220" class="text-center">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@item.CustomerId</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle bg-primary text-white me-2">
+                                                @item.FullName.Substring(0, 1).ToUpper()
+                                            </div>
+                                            @item.FullName
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <i class="bi bi-envelope me-1 text-muted"></i>
+                                        @item.Email
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.Phone))
+                                        {
+                                            <i class="bi bi-telephone me-1 text-muted"></i>
+                                            @item.Phone
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic">Chưa có</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Addresses != null && item.Addresses.Any())
+                                        {
+                                            var firstAddress = item.Addresses.First();
+                                            <div class="small">
+                                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                                                @firstAddress.Address1
+                                            </div>
+                                            @if (item.Addresses.Count > 1)
+                                            {
+                                                <small class="text-muted">
+                                                    <i class="bi bi-plus-circle"></i>
+                                                    @(item.Addresses.Count - 1) địa chỉ khác
+                                                </small>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic">Chưa có địa chỉ</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (item.IsActive)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle"></i> Hoạt động
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-lock"></i> Khóa
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a asp-area="Admin"
+                                               asp-controller="Customer"
+                                               asp-action="Details"
+                                               asp-route-id="@item.CustomerId"
+                                               class="btn btn-info btn-sm"
+                                               title="Xem chi tiết">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a asp-area="Admin"
+                                               asp-controller="Customer"
+                                               asp-action="Edit"
+                                               asp-route-id="@item.CustomerId"
+                                               class="btn btn-warning btn-sm"
+                                               title="Sửa">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-area="Admin"
+                                               asp-controller="Customer"
+                                               asp-action="Delete"
+                                               asp-route-id="@item.CustomerId"
+                                               class="btn btn-danger btn-sm"
+                                               onclick="return confirm('Bạn có chắc muốn xóa khách hàng @item.FullName?')"
+                                               title="Xóa">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                                    Chưa có khách hàng nào
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-circle {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+</style>

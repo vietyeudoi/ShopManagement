@@ -21,8 +21,9 @@ public partial class Order
     [Column(TypeName = "decimal(18, 2)")]
     public decimal TotalAmount { get; set; }
 
-    [StringLength(50)]
+    public string? Address { get; set; }
 
+    [Column(TypeName = "nvarchar(50)")]
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
     public enum OrderStatus
@@ -44,8 +45,6 @@ public partial class Order
     [InverseProperty("Order")]
     public virtual Payment? Payment { get; set; }
 
-    public string? Address { get; set; }
-
     [ForeignKey("UserId")]
     [InverseProperty("Orders")]
     public virtual User User { get; set; } = null!;
@@ -53,3 +52,4 @@ public partial class Order
     //public ICollection<User> Users { get; set; } = new List<User>();
     //public ICollection<Customer> Customers { get;  set; } = new List<Customer>();
 }
+

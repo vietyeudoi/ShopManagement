@@ -74,7 +74,11 @@
                     {
                         <div class="cart-item d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center">
-                                <img src="@item.ImageUrl" class="product-img me-3" />
+                                <img src="@(string.IsNullOrEmpty(item.ImageUrl)
+                                             ? "https://via.placeholder.com/400x400?text=No+Image"
+                                             : Url.Content("~/upload/" + item.ImageUrl))"
+                                     class="product-img me-3"
+                                     alt="@item.ProductName" />
                                 <div>
                                     <h6 class="mb-1">@item.ProductName</h6>
                                     <small class="text-muted">

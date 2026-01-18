@@ -5,230 +5,393 @@
     ViewData["Title"] = "Trang cá nhân";
 }
 
-<h2>Hồ sơ cá nhân</h2>
-<p class="text-muted">Quản lý thông tin cá nhân</p>
+<style>
+    .address-item {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+        transition: all 0.2s;
+    }
 
-<div class="mb-3">
-    <button type="button" class="btn btn-warning" id="btnEdit">Chỉnh sửa</button>
-    <button type="button" class="btn btn-primary d-none" id="btnSave">Lưu</button>
-    <button type="button" class="btn btn-secondary d-none" id="btnCancel">Huỷ</button>
-</div>
-
-<form method="post" id="profileForm">
-    <input type="hidden" asp-for="CustomerId" />
-
-    <!-- ========== THÔNG TIN ========== -->
-    <h5>Thông tin cá nhân</h5>
-    <div class="mb-2">
-        <label>Họ và tên</label>
-        <input asp-for="FullName" class="form-control editable" disabled />
-    </div>
-
-    <div class="mb-2">
-        <label>Số điện thoại</label>
-        <input asp-for="Phone" class="form-control editable" disabled />
-    </div>
-
-    <hr />
-
-    <!-- ========== ĐỊA CHỈ ========== -->
-    <h5>Danh sách địa chỉ</h5>
-
-    <div id="addressList">
-        @for (int i = 0; i < Model.ListAdress.Count; i++)
-        {
-            <div class="border rounded p-2 mb-2 d-flex justify-content-between align-items-center"
-                 id="addr-@i"
-                 data-address="@Model.ListAdress[i]">
-
-                <span>@Model.ListAdress[i]</span>
-
-                <!-- 🔥 INPUT ẨN GIỮ ĐỊA CHỈ CŨ -->
-                <input type="hidden"
-                       name="ListAdress"
-                       value="@Model.ListAdress[i]" />
-
-                <button type="button"
-                        class="btn btn-sm btn-outline-danger btnRemove d-none"
-                        data-index="@i">
-                    ❌
-                </button>
-            </div>
-
+        .address-item:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
         }
-    </div>
 
+    .btn-edit-address {
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
 
-    <button type="button" class="btn btn-secondary mt-2 d-none" id="btnAdd">
-        Thêm địa chỉ
-    </button>
+    .address-item:hover .btn-edit-address {
+        opacity: 1;
+    }
+</style>
 
-    <!-- ========== ADD ADDRESS ========== -->
-    <div class="mt-3 border-top pt-3 d-none" id="divAdd">
-        <h6>Thêm địa chỉ mới</h6>
+<div class="container py-4">
+    <h2 class="mb-1">Hồ sơ cá nhân</h2>
+    <p class="text-muted">Quản lý thông tin cá nhân</p>
 
-        <select id="province" class="form-select mb-2 editable" disabled>
-            <option value="">-- Chọn Tỉnh --</option>
-        </select>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
-        <select id="district" class="form-select mb-2 editable" disabled>
-            <option value="">-- Chọn Huyện --</option>
-        </select>
-
-        <select id="ward" class="form-select mb-2 editable" disabled>
-            <option value="">-- Chọn Xã --</option>
-        </select>
-
-        <input type="text"
-               id="txtFullAddress"
-               class="form-control mb-2"
-               placeholder="Địa chỉ đầy đủ"
-               readonly />
-
-        <button type="button" class="btn btn-outline-secondary" id="btnHideAdd">
-            Huỷ thêm
+    <!-- ===== NÚT TRÊN CÙNG ===== -->
+    <div class="mb-3">
+        <button type="button" class="btn btn-warning" id="btnEdit">
+            <i class="bi bi-pencil"></i> Chỉnh sửa
         </button>
-    </div>
-</form>
 
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <a asp-area="Customer"
+           asp-controller="Profile"
+           asp-action="ChangePassword"
+           class="btn btn-danger ms-2">
+            <i class="bi bi-shield-lock"></i> Đổi mật khẩu
+        </a>
+    </div>
+
+    <form method="post" id="profileForm">
+        <input type="hidden" asp-for="CustomerId" />
+
+        <!-- ===== THÔNG TIN CÁ NHÂN ===== -->
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-person-circle me-2"></i>Thông tin cá nhân</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Họ và tên</label>
+                        <input asp-for="FullName" class="form-control editable" disabled />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Email</label>
+                        <input asp-for="Email" class="form-control" disabled readonly />
+                        <small class="text-muted">Email không thể thay đổi</small>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Số điện thoại</label>
+                        <input asp-for="Phone" class="form-control editable" disabled />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ĐỊA CHỈ ===== -->
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Danh sách địa chỉ</h5>
+            </div>
+            <div class="card-body">
+                <div id="addressList">
+                    @if (Model.Addresses != null && Model.Addresses.Any())
+                    {
+                        @for (int i = 0; i < Model.Addresses.Count; i++)
+                        {
+                            var address = Model.Addresses.ElementAt(i);
+                            <div class="address-item" data-address-id="@address.AddressId">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="flex-grow-1">
+                                        <i class="bi bi-house-door text-success me-2"></i>
+                                        <span class="address-text">@address.Address1</span>
+                                        <input type="text"
+                                               name="addressList[@i]"
+                                               value="@address.Address1"
+                                               class="form-control d-none address-edit-input"
+                                               data-original="@address.Address1" />
+                                    </div>
+
+                                    <div class="btn-group ms-2 btn-edit-address" role="group">
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-primary btnEditAddr"
+                                                title="Sửa">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger btnRemove"
+                                                data-address-id="@address.AddressId"
+                                                title="Xóa">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="alert alert-info" id="noAddressAlert">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Bạn chưa có địa chỉ nào. Nhấn "Thêm địa chỉ" để thêm địa chỉ mới.
+                        </div>
+                    }
+                </div>
+
+                <button type="button" class="btn btn-outline-success mt-2 d-none" id="btnAdd">
+                    <i class="bi bi-plus-circle me-2"></i> Thêm địa chỉ
+                </button>
+
+                <!-- ===== FORM THÊM ĐỊA CHỈ ===== -->
+                <div class="mt-3 border-top pt-3 d-none" id="divAdd">
+                    <h6><i class="bi bi-plus-circle me-2"></i>Thêm địa chỉ mới</h6>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <select id="province" class="form-select">
+                                <option value="">-- Chọn Tỉnh/Thành phố --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-2">
+                            <select id="district" class="form-select">
+                                <option value="">-- Chọn Quận/Huyện --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-2">
+                            <select id="ward" class="form-select">
+                                <option value="">-- Chọn Phường/Xã --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <input type="text"
+                           id="txtStreet"
+                           class="form-control mb-2"
+                           placeholder="Số nhà, tên đường (VD: 123 Lê Lợi)" />
+
+                    <input type="text"
+                           id="txtFullAddress"
+                           class="form-control mb-2"
+                           placeholder="Địa chỉ đầy đủ"
+                           readonly />
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-success" id="btnConfirmAdd">
+                            <i class="bi bi-check-circle me-1"></i> Xác nhận thêm
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="btnCancelAdd">
+                            <i class="bi bi-x-circle me-1"></i> Hủy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== NÚT DƯỚI CÙNG ===== -->
+        <div class="text-end mt-4">
+            <button type="button"
+                    class="btn btn-secondary d-none"
+                    id="btnCancel">
+                <i class="bi bi-x-circle me-1"></i> Hủy
+            </button>
+
+            <button type="submit"
+                    class="btn btn-primary d-none ms-2"
+                    id="btnSave">
+                <i class="bi bi-save me-1"></i> Lưu thay đổi
+            </button>
+        </div>
+    </form>
+</div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-
         const province = document.getElementById("province");
         const district = document.getElementById("district");
         const ward = document.getElementById("ward");
+        const txtStreet = document.getElementById("txtStreet");
         const txtFullAddress = document.getElementById("txtFullAddress");
 
         const btnEdit = document.getElementById("btnEdit");
         const btnSave = document.getElementById("btnSave");
         const btnCancel = document.getElementById("btnCancel");
         const btnAdd = document.getElementById("btnAdd");
-        const btnHideAdd = document.getElementById("btnHideAdd");
+        const btnConfirmAdd = document.getElementById("btnConfirmAdd");
+        const btnCancelAdd = document.getElementById("btnCancelAdd");
         const divAdd = document.getElementById("divAdd");
-        const form = document.getElementById("profileForm");
+        const addressList = document.getElementById("addressList");
 
-        /* ===== LOAD PROVINCE ===== */
-        axios.get("https://provinces.open-api.vn/api/p/")
-            .then(res => {
-                res.data.forEach(p => {
-                    province.innerHTML +=
-                        `<option value="${p.code}">${p.name}</option>`;
-                });
-            });
+        let isEditMode = false;
 
-        province.onchange = function () {
-            district.innerHTML = `<option value="">-- Chọn Huyện --</option>`;
-            ward.innerHTML = `<option value="">-- Chọn Xã --</option>`;
-            txtFullAddress.value = "";
-
-            if (!this.value) return;
-
-            axios.get(`https://provinces.open-api.vn/api/p/${this.value}?depth=2`)
-                .then(res => {
-                    res.data.districts.forEach(d => {
-                        district.innerHTML +=
-                            `<option value="${d.code}">${d.name}</option>`;
-                    });
-                });
-        };
-
-        district.onchange = function () {
-            ward.innerHTML = `<option value="">-- Chọn Xã --</option>`;
-            txtFullAddress.value = "";
-
-            if (!this.value) return;
-
-            axios.get(`https://provinces.open-api.vn/api/d/${this.value}?depth=2`)
-                .then(res => {
-                    res.data.wards.forEach(w => {
-                        ward.innerHTML +=
-                            `<option value="${w.name}">${w.name}</option>`;
-                    });
-                });
-        };
-
-        ward.onchange = function () {
-            const p = province.options[province.selectedIndex]?.text;
-            const d = district.options[district.selectedIndex]?.text;
-            if (p && d && ward.value) {
-                txtFullAddress.value = `${ward.value}, ${d}, ${p}`;
-            }
-        };
-
-        /* ===== EDIT ===== */
-    btnEdit.onclick = function () {
-
-        // Cho sửa input
-        document.querySelectorAll(".editable").forEach(e => e.disabled = false);
-
-        // Hiện nút xoá địa chỉ
-        document.querySelectorAll(".btnRemove").forEach(b => {
-            b.classList.remove("d-none");
-        });
-
-        btnEdit.classList.add("d-none");
-        btnSave.classList.remove("d-none");
-        btnCancel.classList.remove("d-none");
-        btnAdd.classList.remove("d-none");
-    };
-
-
-        btnAdd.onclick = () => divAdd.classList.remove("d-none");
-        btnHideAdd.onclick = () => divAdd.classList.add("d-none");
-        btnCancel.onclick = () => location.reload();
-
-        /* ===== XOÁ ĐỊA CHỈ ===== */
-        document.addEventListener("click", function (e) {
-            if (e.target.classList.contains("btnRemove")) {
-                e.target.closest("[data-address]").remove();
-            }
-        });
-
-        /* ===== SUBMIT ===== */
-    btnSave.onclick = function () {
-
-        if (txtFullAddress.value) {
-
-            const wrapper = document.createElement("div");
-
-            const input = document.createElement("input");
-            input.type = "hidden";
-            input.name = "ListAdress";
-            input.value = txtFullAddress.value;
-
-            wrapper.appendChild(input);
-            form.appendChild(wrapper);
-        }
-
-        form.submit();
-    };
-
-    });
-
-        document.addEventListener("click", function (e) {
-        if (e.target.classList.contains("btnRemove")) {
-
-            if (!confirm("Xoá địa chỉ này?")) return;
-
-            const index = e.target.dataset.index;
-
-            fetch('/Customer/Profile/DeleteAddress', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: `index=${index}`
-            })
+        // ===== LOAD TỈNH =====
+        fetch("https://provinces.open-api.vn/api/p/")
             .then(res => res.json())
             .then(data => {
-                if (data.success) {
-                    document.getElementById(`addr-${index}`).remove();
-                } else {
-                    alert("Xoá thất bại");
-                }
-            });
+                data.forEach(p => {
+                    province.innerHTML += `<option value="${p.code}">${p.name}</option>`;
+                });
+            })
+            .catch(err => console.error("Load tỉnh lỗi", err));
+
+        // ===== TỈNH → HUYỆN =====
+        province.addEventListener("change", function () {
+            district.innerHTML = `<option value="">-- Chọn Quận/Huyện --</option>`;
+            ward.innerHTML = `<option value="">-- Chọn Phường/Xã --</option>`;
+            updateFullAddress();
+
+            if (!this.value) return;
+
+            fetch(`https://provinces.open-api.vn/api/p/${this.value}?depth=2`)
+                .then(res => res.json())
+                .then(data => {
+                    data.districts.forEach(d => {
+                        district.innerHTML += `<option value="${d.code}">${d.name}</option>`;
+                    });
+                });
+        });
+
+        // ===== HUYỆN → XÃ =====
+        district.addEventListener("change", function () {
+            ward.innerHTML = `<option value="">-- Chọn Phường/Xã --</option>`;
+            updateFullAddress();
+
+            if (!this.value) return;
+
+            fetch(`https://provinces.open-api.vn/api/d/${this.value}?depth=2`)
+                .then(res => res.json())
+                .then(data => {
+                    data.wards.forEach(w => {
+                        ward.innerHTML += `<option value="${w.name}">${w.name}</option>`;
+                    });
+                });
+        });
+
+        ward.addEventListener("change", updateFullAddress);
+        txtStreet.addEventListener("input", updateFullAddress);
+
+        function updateFullAddress() {
+            const p = province.options[province.selectedIndex]?.text;
+            const d = district.options[district.selectedIndex]?.text;
+            const w = ward.value;
+            const street = txtStreet.value.trim();
+
+            let parts = [];
+            if (street) parts.push(street);
+            if (w && w !== "-- Chọn Phường/Xã --") parts.push(w);
+            if (d && d !== "-- Chọn Quận/Huyện --") parts.push(d);
+            if (p && p !== "-- Chọn Tỉnh/Thành phố --") parts.push(p);
+
+            txtFullAddress.value = parts.join(", ");
         }
+
+        // ===== EDIT MODE =====
+        btnEdit.onclick = function () {
+            isEditMode = true;
+            document.querySelectorAll(".editable").forEach(e => e.disabled = false);
+            document.querySelectorAll(".btn-edit-address").forEach(b => b.style.opacity = "1");
+
+            btnEdit.classList.add("d-none");
+            btnSave.classList.remove("d-none");
+            btnCancel.classList.remove("d-none");
+            btnAdd.classList.remove("d-none");
+        };
+
+        btnCancel.onclick = () => location.reload();
+
+        // ===== THÊM ĐỊA CHỈ =====
+        btnAdd?.addEventListener("click", () => {
+            divAdd.classList.remove("d-none");
+            btnAdd.classList.add("d-none");
+        });
+
+        btnCancelAdd?.addEventListener("click", () => {
+            divAdd.classList.add("d-none");
+            btnAdd.classList.remove("d-none");
+            resetAddForm();
+        });
+
+        btnConfirmAdd?.addEventListener("click", function () {
+            const newAddress = txtFullAddress.value.trim();
+            if (!newAddress) {
+                alert("Vui lòng nhập đầy đủ thông tin địa chỉ!");
+                return;
+            }
+
+            // Thêm vào danh sách hiển thị
+            const index = document.querySelectorAll('.address-item').length;
+            const newItem = document.createElement("div");
+            newItem.className = "address-item";
+            newItem.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="flex-grow-1">
+                        <i class="bi bi-house-door text-success me-2"></i>
+                        <span class="address-text">${newAddress}</span>
+                        <input type="text" name="addressList[${index}]" value="${newAddress}" class="form-control d-none address-edit-input" />
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger btnRemoveNew" title="Xóa">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+
+            // Xóa alert "chưa có địa chỉ" nếu có
+            const noAddressAlert = document.getElementById("noAddressAlert");
+            if (noAddressAlert) noAddressAlert.remove();
+
+            addressList.appendChild(newItem);
+
+            divAdd.classList.add("d-none");
+            btnAdd.classList.remove("d-none");
+            resetAddForm();
+        });
+
+        function resetAddForm() {
+            province.value = "";
+            district.innerHTML = `<option value="">-- Chọn Quận/Huyện --</option>`;
+            ward.innerHTML = `<option value="">-- Chọn Phường/Xã --</option>`;
+            txtStreet.value = "";
+            txtFullAddress.value = "";
+        }
+
+        // ===== XÓA ĐỊA CHỈ =====
+        document.addEventListener("click", function (e) {
+            // Xóa địa chỉ đã có trong DB
+            if (e.target.closest(".btnRemove")) {
+                const btn = e.target.closest(".btnRemove");
+                const addressId = btn.dataset.addressId;
+
+                if (!confirm("Bạn có chắc muốn xóa địa chỉ này?")) return;
+
+                fetch('/Customer/Profile/DeleteAddress', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `addressId=${addressId}`
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        btn.closest(".address-item").remove();
+
+                        // Kiểm tra nếu không còn địa chỉ nào
+                        if (addressList.querySelectorAll('.address-item').length === 0) {
+                            addressList.innerHTML = `
+                                <div class="alert alert-info" id="noAddressAlert">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    Bạn chưa có địa chỉ nào. Nhấn "Thêm địa chỉ" để thêm địa chỉ mới.
+                                </div>
+                            `;
+                        }
+                    } else {
+                        alert(data.message || "Xóa thất bại!");
+                    }
+                });
+            }
+
+            // Xóa địa chỉ mới thêm (chưa lưu)
+            if (e.target.closest(".btnRemoveNew")) {
+                if (confirm("Bạn có chắc muốn xóa địa chỉ này?")) {
+                    e.target.closest(".address-item").remove();
+                }
+            }
+        });
     });
 </script>

@@ -15,13 +15,9 @@ namespace Sieu_Thi_Mini.Controllers
         {
             var role = HttpContext.Session.GetString("Role");
 
-            if (role == "Customer")
+            if (role == "Customer" || role == "Admin")
             {
                 ViewData["Layout"] = "_LayoutCustomer";
-            }
-            else if (role == "Admin")
-            {
-                ViewData["Layout"] = "_LayoutAdmin";
             }
             else
             {
@@ -40,9 +36,14 @@ namespace Sieu_Thi_Mini.Controllers
 
         public IActionResult Index(int? categoryId)
         {
-            ViewBag.Categories = _context.Categories.ToList();
+            ViewBag.Categories = _context.Categories
+                .Where(c => c.IsActive)
+                .ToList();
 
-            var products = _context.Products.AsQueryable();
+            var products = _context.Products
+                .Include(p => p.Category)
+                .Where(p => p.IsActive && p.Category.IsActive)
+                .AsQueryable();
 
             if (categoryId.HasValue)
             {
@@ -51,6 +52,7 @@ namespace Sieu_Thi_Mini.Controllers
             }
 
             return View(products.ToList());
+
         }
 
 
@@ -64,47 +66,58 @@ namespace Sieu_Thi_Mini.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+        [Route("/Contact")]
         public IActionResult Contact()
         {
             return View(new ContactViewModel());
         }
         public IActionResult Search(string keyword, int? categoryId)
         {
-            // Danh mục bên trái
-            ViewBag.Categories = _context.Categories.ToList();
+            ViewBag.Categories = _context.Categories
+                .Where(c => c.IsActive)
+                .ToList();
+
             ViewBag.CategoryId = categoryId;
             ViewBag.Keyword = keyword;
 
-            var products = _context.Products.AsQueryable();
+            var products = _context.Products
+                .Include(p => p.Category)
+                .Where(p => p.IsActive && p.Category.IsActive)
+                .AsQueryable();
 
-            // 🔴 CHỈ search khi KHÔNG chọn danh mục
             if (categoryId == null && !string.IsNullOrWhiteSpace(keyword))
             {
                 products = products.Where(p => p.ProductName.Contains(keyword));
             }
 
-            // 🔴 Khi chọn danh mục → bỏ keyword
             if (categoryId.HasValue)
             {
                 products = products.Where(p => p.CategoryId == categoryId);
-                ViewBag.Keyword = null; // xoá keyword
+                ViewBag.Keyword = null;
             }
 
             return View(products.ToList());
+
         }
 
         public IActionResult Details(int id)
         {
             var product = _context.Products
                 .Include(p => p.Category)
-                .FirstOrDefault(p => p.ProductId == id);
+                .FirstOrDefault(p =>
+                    p.ProductId == id &&
+                    p.IsActive &&
+                    p.Category.IsActive);
 
             if (product == null)
                 return NotFound();
 
             var relatedProducts = _context.Products
-                .Where(p => p.CategoryId == product.CategoryId
-                            && p.ProductId != product.ProductId)
+                .Where(p =>
+                    p.IsActive &&
+                    p.Category.IsActive &&
+                    p.CategoryId == product.CategoryId &&
+                    p.ProductId != product.ProductId)
                 .Take(4)
                 .ToList();
 

@@ -1,33 +1,53 @@
 ﻿@model Sieu_Thi_Mini.Models.Product
+
 @{
     Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Xoá sản phẩm";
 }
 
 <div class="container-fluid">
-    <div class="card shadow-sm">
-        <div class="card-header bg-danger text-white">
-            <h4>Xoá sản phẩm</h4>
-        </div>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-danger text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-trash3 me-2"></i>Xoá sản phẩm</h5>
+                </div>
 
-        <div class="card-body">
-            <p>Bạn chắc chắn muốn xoá sản phẩm:</p>
-            <h5 class="text-danger">@Model.ProductName</h5>
+                <div class="card-body text-center p-4">
+                    <p>Bạn chắc chắn muốn xoá sản phẩm:</p>
+                    <h5 class="text-danger fw-bold">@Model.ProductName</h5>
 
-            @if (!string.IsNullOrEmpty(Model.ImageUrl))
-            {
-                <img src="~/upload/@Model.ImageUrl" width="120" class="mb-3" />
-            }
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="~/upload/@Model.ImageUrl"
+                             class="img-fluid mb-3"
+                             style="max-height:200px; object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <img src="https://via.placeholder.com/200x200?text=No+Image"
+                             class="img-fluid mb-3"
+                             style="object-fit:cover; max-height:200px;" />
+                    }
 
-            <form asp-area="Admin"
-                  asp-controller="Product"
-                  asp-action="DeleteConfirmed"
-                  asp-route-id="@Model.ProductId"
-                  method="post">
-                @Html.AntiForgeryToken()
+                    <p class="text-muted small">Hành động này không thể hoàn tác.</p>
 
-                <button type="submit" class="btn btn-danger">Xoá</button>
-                <a asp-action="Index" class="btn btn-secondary">Huỷ</a>
-            </form>
+                    <form asp-area="Admin"
+                          asp-controller="Product"
+                          asp-action="DeleteConfirmed"
+                          asp-route-id="@Model.ProductId"
+                          method="post" class="d-flex justify-content-center gap-2 mt-3">
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="bi bi-trash3 me-1"></i> Xoá
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4">
+                            <i class="bi bi-x-circle me-1"></i> Huỷ
+                        </a>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>

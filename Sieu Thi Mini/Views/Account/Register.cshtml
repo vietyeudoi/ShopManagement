@@ -1,80 +1,79 @@
 ﻿@{
     ViewData["Title"] = "Đăng ký";
-    Layout = null; // hoặc _LayoutCustomer nếu bạn muốn
+    Layout = "_Layout"; // hoặc null nếu muốn form riêng
 }
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="utf-8" />
-    <title>Đăng ký</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-</head>
-<body class="bg-light">
+<div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
+    <div class="card shadow-lg p-4" style="width: 100%; max-width: 350px;">
+        <!-- giảm max-width -->
+        <div class="text-center mb-4">
+            <h3 class="fw-bold">📝 Đăng ký</h3>
+            <p class="text-muted mb-0">Tạo tài khoản mới</p>
+        </div>
 
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-5">
-                <div class="card shadow">
-                    <div class="card-header text-center fw-bold">
-                        ĐĂNG KÝ TÀI KHOẢN
-                    </div>
-
-                    <div class="card-body">
-
-                        @* Hiển thị lỗi *@
-                        @if (ViewBag.Error != null)
-                        {
-                            <div class="alert alert-danger">
-                                @ViewBag.Error
-                            </div>
-                        }
-
-                        <form asp-action="Register" asp-controller="Account" method="post">
-
-                            <div class="mb-3">
-                                <label class="form-label">Họ và tên</label>
-                                <input type="text"
-                                       name="fullName"
-                                       class="form-control"
-                                       placeholder="Nhập họ tên"
-                                       required />
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Email</label>
-                                <input type="email"
-                                       name="email"
-                                       class="form-control"
-                                       placeholder="example@gmail.com"
-                                       required />
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Mật khẩu</label>
-                                <input type="password"
-                                       name="password"
-                                       class="form-control"
-                                       placeholder="Tối thiểu 6 ký tự"
-                                       required />
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">
-                                    Đăng ký
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="card-footer text-center">
-                        Đã có tài khoản?
-                        <a asp-action="Login" asp-controller="Account">Đăng nhập</a>
-                    </div>
-                </div>
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>@ViewBag.Error
             </div>
+        }
+
+        <form asp-action="Register" asp-controller="Account" method="post">
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Họ và tên</label>
+                <input type="text"
+                       name="fullName"
+                       class="form-control"
+                       placeholder="Nhập họ tên"
+                       required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Email</label>
+                <input type="email"
+                       name="email"
+                       class="form-control"
+                       placeholder="example@gmail.com"
+                       required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Mật khẩu</label>
+                <input type="password"
+                       name="password"
+                       class="form-control"
+                       placeholder="Tối thiểu 6 ký tự"
+                       required minlength="6" />
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary fw-bold">
+                    Đăng ký
+                </button>
+            </div>
+        </form>
+
+        <div class="text-center mt-3">
+            <span class="text-muted">Đã có tài khoản?</span>
+            <a asp-action="Login" asp-controller="Account" class="fw-bold ms-1">Đăng nhập</a>
         </div>
     </div>
+</div>
 
-</body>
-</html>
+<style>
+    .bg-light {
+        background-color: #f8f9fa;
+    }
+
+    input.form-control {
+        height: 42px; /* nhỏ hơn */
+        font-size: 0.95rem;
+    }
+
+    button.btn {
+        height: 42px;
+        font-size: 0.95rem;
+    }
+
+</style>

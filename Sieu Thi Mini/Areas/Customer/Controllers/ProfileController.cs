@@ -1,60 +1,134 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Sieu_Thi_Mini.Models;
 
 namespace Sieu_Thi_Mini.Areas.Customer.Controllers
 {
+    [Area("Customer")]
     public class ProfileController : BaseCustomerController
     {
         private readonly ShopManagementContext _context;
-        public ProfileController (ShopManagementContext context)
+
+        public ProfileController(ShopManagementContext context)
         {
             _context = context;
         }
-        [Area("Customer")]
+
         public IActionResult Index()
         {
             var customerId = HttpContext.Session.GetInt32("CustomerId");
-            var cus = _context.Customers.Find(customerId);
-            cus?.LoadAdress();
-            return View(cus);
+            if (customerId == null)
+                return RedirectToAction("Login", "Account");
+
+            // ✅ Include Addresses để load collection
+            var customer = _context.Customers
+                .Include(c => c.Addresses)
+                .FirstOrDefault(c => c.CustomerId == customerId);
+
+            if (customer == null)
+                return RedirectToAction("Login", "Account");
+
+            return View(customer);
         }
 
         [HttpPost]
-        public IActionResult Index(Sieu_Thi_Mini.Models.Customer model)
+        public IActionResult Index(Sieu_Thi_Mini.Models.Customer model, List<string> addressList)
         {
-            var customer = _context.Customers.Find(model.CustomerId);
-            if (customer == null) return NotFound();
+            var customer = _context.Customers
+                .Include(c => c.Addresses)
+                .FirstOrDefault(c => c.CustomerId == model.CustomerId);
 
+            if (customer == null)
+                return NotFound();
+
+            // ✅ Cập nhật thông tin cơ bản
             customer.FullName = model.FullName;
             customer.Phone = model.Phone;
 
-            customer.ListAdress = model.ListAdress ?? new();
-            customer.JAdress();
+            // ✅ Xóa tất cả địa chỉ cũ
+            var oldAddresses = customer.Addresses.ToList();
+            _context.Addresses.RemoveRange(oldAddresses);
+
+            // ✅ Thêm địa chỉ mới từ form
+            if (addressList != null && addressList.Any())
+            {
+                foreach (var addr in addressList.Where(a => !string.IsNullOrWhiteSpace(a)))
+                {
+                    customer.Addresses.Add(new Address
+                    {
+                        CustomerId = customer.CustomerId,
+                        Address1 = addr.Trim()
+                    });
+                }
+            }
 
             _context.SaveChanges();
+
+            TempData["Success"] = "Cập nhật thông tin thành công!";
             return RedirectToAction("Index");
         }
 
         [HttpPost]
-        public IActionResult DeleteAddress(int index)
+        public IActionResult AddAddress(string newAddress)
         {
             var customerId = HttpContext.Session.GetInt32("CustomerId");
-            if (customerId == null) return Json(new { success = false });
+            if (customerId == null)
+                return Json(new { success = false, message = "Chưa đăng nhập" });
 
-            var customer = _context.Customers.Find(customerId);
-            if (customer == null) return Json(new { success = false });
+            if (string.IsNullOrWhiteSpace(newAddress))
+                return Json(new { success = false, message = "Địa chỉ không được để trống" });
 
-            customer.LoadAdress();
+            var address = new Address
+            {
+                CustomerId = customerId.Value,
+                Address1 = newAddress.Trim()
+            };
 
-            if (index < 0 || index >= customer.ListAdress.Count)
-                return Json(new { success = false });
-
-            customer.ListAdress.RemoveAt(index);
-            customer.JAdress();
-
+            _context.Addresses.Add(address);
             _context.SaveChanges();
 
-            return Json(new { success = true });
+            return Json(new { success = true, message = "Thêm địa chỉ thành công" });
+        }
+
+        [HttpPost]
+        public IActionResult DeleteAddress(int addressId)
+        {
+            var customerId = HttpContext.Session.GetInt32("CustomerId");
+            if (customerId == null)
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+
+            var address = _context.Addresses
+                .FirstOrDefault(a => a.AddressId == addressId && a.CustomerId == customerId);
+
+            if (address == null)
+                return Json(new { success = false, message = "Không tìm thấy địa chỉ" });
+
+            _context.Addresses.Remove(address);
+            _context.SaveChanges();
+
+            return Json(new { success = true, message = "Xóa địa chỉ thành công" });
+        }
+
+        [HttpPost]
+        public IActionResult UpdateAddress(int addressId, string newAddress)
+        {
+            var customerId = HttpContext.Session.GetInt32("CustomerId");
+            if (customerId == null)
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+
+            if (string.IsNullOrWhiteSpace(newAddress))
+                return Json(new { success = false, message = "Địa chỉ không được để trống" });
+
+            var address = _context.Addresses
+                .FirstOrDefault(a => a.AddressId == addressId && a.CustomerId == customerId);
+
+            if (address == null)
+                return Json(new { success = false, message = "Không tìm thấy địa chỉ" });
+
+            address.Address1 = newAddress.Trim();
+            _context.SaveChanges();
+
+            return Json(new { success = true, message = "Cập nhật địa chỉ thành công" });
         }
 
         public IActionResult ChangePassword()
@@ -62,11 +136,10 @@ namespace Sieu_Thi_Mini.Areas.Customer.Controllers
             return View();
         }
 
-
         [HttpPost]
         public IActionResult ChangePassword(
             string CurrentPassword,
-            string NewPassword,S
+            string NewPassword,
             string ConfirmPassword)
         {
             var customerId = HttpContext.Session.GetInt32("CustomerId");
@@ -77,37 +150,40 @@ namespace Sieu_Thi_Mini.Areas.Customer.Controllers
             if (customer == null)
                 return RedirectToAction("Login", "Account");
 
-            // ❌ sai mật khẩu hiện tại
+            // ❌ Kiểm tra mật khẩu hiện tại
             if (!BCrypt.Net.BCrypt.Verify(CurrentPassword, customer.Password))
             {
                 ViewBag.Error = "Mật khẩu hiện tại không đúng";
                 return View();
             }
 
-            // ❌ mật khẩu mới không khớp
+            // ❌ Kiểm tra mật khẩu mới không khớp
             if (NewPassword != ConfirmPassword)
             {
                 ViewBag.Error = "Xác nhận mật khẩu không khớp";
                 return View();
             }
 
-            // ❌ mật khẩu mới trùng mật khẩu cũ
+            // ❌ Kiểm tra mật khẩu mới trùng mật khẩu cũ
             if (BCrypt.Net.BCrypt.Verify(NewPassword, customer.Password))
             {
                 ViewBag.Error = "Mật khẩu mới phải khác mật khẩu cũ";
                 return View();
             }
 
-            // ✅ hash mật khẩu mới
+            // ✅ Kiểm tra độ dài mật khẩu
+            if (NewPassword.Length < 6)
+            {
+                ViewBag.Error = "Mật khẩu mới phải có ít nhất 6 ký tự";
+                return View();
+            }
+
+            // ✅ Hash mật khẩu mới và lưu
             customer.Password = BCrypt.Net.BCrypt.HashPassword(NewPassword);
             _context.SaveChanges();
 
             ViewBag.Success = "Đổi mật khẩu thành công";
             return View();
         }
-
-
-
-
     }
 }

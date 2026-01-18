@@ -4,79 +4,641 @@
 @{
     Layout = ViewData["Layout"]?.ToString() ?? "_Layout";
     ViewData["Title"] = "Trang chủ";
-
     var categories = ViewBag.Categories as List<Category>;
     int? activeCategory = ViewBag.CategoryId;
 }
 
-<div class="row">
+<style>
+    :root {
+        --primary: #e63946;
+        --primary-dark: #d00000;
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+        --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-    <!-- ========== DANH MỤC BÊN TRÁI ========== -->
-    <div class="col-md-3">
-        <div class="list-group shadow-sm">
+    /* ========== SIDEBAR CATEGORIES ========== */
+    .category-sidebar {
+        position: sticky;
+        top: 90px;
+        z-index: 10;
+    }
 
-            <a asp-action="Index"
-               class="list-group-item list-group-item-action
-               @(activeCategory == null ? "active" : "")">
-                Tất cả sản phẩm
-            </a>
+    .category-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+    }
 
-            @foreach (var c in categories)
-            {
-                <a asp-action="Index"
-                   asp-route-categoryId="@c.CategoryId"
-                   class="list-group-item list-group-item-action
-                       @(activeCategory == c.CategoryId ? "active" : "")">
-                    @c.CategoryName
-                </a>
+        .category-card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+    .category-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        padding: 1.25rem 1.5rem;
+        border: none;
+    }
+
+    .category-item {
+        border: none;
+        border-bottom: 1px solid #f0f0f0;
+        padding: 1rem 1.5rem;
+        transition: var(--transition);
+        cursor: pointer;
+        position: relative;
+    }
+
+        .category-item:last-child {
+            border-bottom: none;
+        }
+
+        .category-item:hover {
+            background: rgba(230, 57, 70, 0.05);
+            padding-left: 2rem;
+        }
+
+        .category-item.active {
+            background: rgba(230, 57, 70, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+            border-left: 4px solid var(--primary);
+        }
+
+            .category-item.active::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 4px;
+                background: var(--primary);
             }
+
+        .category-item i {
+            transition: var(--transition);
+        }
+
+        .category-item:hover i:last-child {
+            transform: translateX(5px);
+        }
+
+    /* ========== PROMO BANNER ========== */
+    .promo-banner {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: relative;
+    }
+
+        .promo-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+    @@keyframes shimmer {
+        0%, 100% {
+            transform: translate(0, 0);
+        }
+
+        50% {
+            transform: translate(-20px, -20px);
+        }
+    }
+
+    .promo-banner .btn {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: var(--transition);
+    }
+
+        .promo-banner .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+    /* ========== BREADCRUMB ========== */
+    .custom-breadcrumb {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #f0f0f0;
+    }
+
+    .breadcrumb-item a {
+        color: #6c757d;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+        .breadcrumb-item a:hover {
+            color: var(--primary);
+        }
+
+    .breadcrumb-item.active {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    /* ========== SECTION HEADER ========== */
+    .section-header {
+        position: relative;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+
+        .section-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), transparent);
+            border-radius: 2px;
+        }
+
+    .section-title {
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 1.75rem;
+        margin-bottom: 0;
+        position: relative;
+        display: inline-block;
+    }
+
+    .product-count {
+        background: rgba(230, 57, 70, 0.1);
+        color: var(--primary);
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+    }
+
+    /* ========== PRODUCT CARD ========== */
+    .product-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: var(--transition);
+        box-shadow: var(--shadow-sm);
+        height: 100%;
+        background: white;
+    }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(230, 57, 70, 0.15);
+        }
+
+    .product-image-wrapper {
+        position: relative;
+        overflow: hidden;
+        background: #f8f9fa;
+        aspect-ratio: 1;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.1);
+    }
+
+    .product-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        box-shadow: var(--shadow-md);
+        z-index: 2;
+    }
+
+    .badge-out-of-stock {
+        background: linear-gradient(135deg, #6c757d, #495057);
+        color: white;
+    }
+
+    .badge-low-stock {
+        background: linear-gradient(135deg, #ffc107, #ff9800);
+        color: white;
+    }
+
+    .quick-actions {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        opacity: 0;
+        transform: translateX(10px);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 2;
+    }
+
+    .product-card:hover .quick-actions {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .quick-action-btn {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border: none;
+        border-radius: 50%;
+        box-shadow: var(--shadow-md);
+        color: #6c757d;
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+        .quick-action-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
+        }
+
+    .product-body {
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .product-title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 2.8em;
+        line-height: 1.4;
+    }
+
+        .product-title a {
+            color: #212529;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+            .product-title a:hover {
+                color: var(--primary);
+            }
+
+    .product-footer {
+        margin-top: auto;
+        padding-top: 0.75rem;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    .product-price {
+        color: var(--primary);
+        font-size: 1.375rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .product-stock {
+        color: #6c757d;
+        font-size: 0.8125rem;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .add-to-cart-btn {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border: none;
+        border-radius: 50%;
+        color: white;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+        .add-to-cart-btn:hover {
+            transform: rotate(15deg) scale(1.1);
+            box-shadow: var(--shadow-lg);
+        }
+
+    /* ========== EMPTY STATE ========== */
+    .empty-state {
+        background: white;
+        border-radius: 16px;
+        padding: 4rem 2rem;
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .empty-state-icon {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 2rem;
+        background: linear-gradient(135deg, rgba(230, 57, 70, 0.1), rgba(230, 57, 70, 0.05));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: var(--primary);
+    }
+
+    .empty-state h4 {
+        color: #212529;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: #6c757d;
+        margin-bottom: 2rem;
+    }
+
+    .btn-back {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border: none;
+        border-radius: 50px;
+        padding: 0.875rem 2rem;
+        color: white;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+    }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: white;
+        }
+
+    /* ========== RESPONSIVE ========== */
+    @@media (max-width: 991.98px) {
+        .category-sidebar {
+            position: static;
+        }
+
+        .promo-banner {
+            margin-top: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+        }
+    }
+
+    @@media (max-width: 575.98px) {
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 1rem;
+        }
+
+        .product-price {
+            font-size: 1.125rem;
+        }
+
+        .add-to-cart-btn {
+            width: 40px;
+            height: 40px;
+        }
+    }
+
+    /* ========== ANIMATIONS ========== */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .product-card {
+        animation: fadeInUp 0.5s ease-out backwards;
+    }
+
+        .product-card:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .product-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .product-card:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .product-card:nth-child(4) {
+            animation-delay: 0.2s;
+        }
+
+        .product-card:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+
+        .product-card:nth-child(6) {
+            animation-delay: 0.3s;
+        }
+
+        .product-card:nth-child(7) {
+            animation-delay: 0.35s;
+        }
+
+        .product-card:nth-child(8) {
+            animation-delay: 0.4s;
+        }
+</style>
+
+<div class="row g-4">
+    <!-- ========== SIDEBAR - DANH MỤC ========== -->
+    <div class="col-lg-3">
+        <div class="category-sidebar">
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="d-flex align-items-center gap-3 text-white">
+                        <i class="bi bi-list-ul fs-3"></i>
+                        <h5 class="mb-0 fw-bold">Danh mục sản phẩm</h5>
+                    </div>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a asp-action="Index"
+                       class="category-item list-group-item-action d-flex align-items-center gap-3 @(activeCategory == null ? "active" : "")">
+                        <i class="bi bi-grid-3x3-gap-fill fs-5"></i>
+                        <span class="flex-grow-1">Tất cả sản phẩm</span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+
+                    @foreach (var c in categories ?? new List<Category>())
+                    {
+                        <a asp-action="Index" asp-route-categoryId="@c.CategoryId"
+                           class="category-item list-group-item-action d-flex align-items-center gap-3 @(activeCategory == c.CategoryId ? "active" : "")">
+                            <i class="bi bi-tag-fill fs-5"></i>
+                            <span class="flex-grow-1">@c.CategoryName</span>
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <!-- Promo Banner -->
+            <div class="promo-banner d-none d-lg-block mt-4">
+                <div class="card-body text-center py-5 position-relative">
+                    <i class="bi bi-megaphone-fill fs-1 mb-3 d-block opacity-75 text-white"></i>
+                    <h5 class="text-white fw-bold mb-2">Khuyến mãi HOT</h5>
+                    <p class="text-white opacity-75 mb-4">Giảm đến 50% sản phẩm bán chạy</p>
+                    <a href="#" class="btn btn-light rounded-pill px-4 fw-bold">
+                        <i class="bi bi-lightning-fill me-2"></i>Xem ngay
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- ========== SẢN PHẨM BÊN PHẢI ========== -->
-    <div class="col-md-9">
+    <!-- ========== MAIN CONTENT - SẢN PHẨM ========== -->
+    <div class="col-lg-9">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb custom-breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="#"><i class="bi bi-house-door-fill me-2"></i>Trang chủ</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    @(activeCategory != null
+                                        ? categories?.FirstOrDefault(c => c.CategoryId == activeCategory)?.CategoryName
+                                        : "Tất cả sản phẩm")
+                </li>
+            </ol>
+        </nav>
 
         @if (!Model.Any())
         {
-            <div class="alert alert-warning">
-                Không có sản phẩm trong danh mục này
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-inbox"></i>
+                </div>
+                <h4>Chưa có sản phẩm nào</h4>
+                <p class="mb-0">Hiện tại danh mục này chưa có sản phẩm.<br />Vui lòng quay lại sau hoặc xem các danh mục khác.</p>
+                <a asp-action="Index" class="btn-back mt-4">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Quay lại tất cả sản phẩm</span>
+                </a>
             </div>
         }
         else
         {
-            <div class="row">
+            <!-- Section Header -->
+            <div class="section-header d-flex flex-wrap justify-content-between align-items-center mb-4">
+                <h2 class="section-title">
+                    @(activeCategory != null
+                                    ? categories?.FirstOrDefault(c => c.CategoryId == activeCategory)?.CategoryName
+                                    : "Tất cả sản phẩm")
+                </h2>
+                <div class="product-count">
+                    <i class="bi bi-box-seam me-2"></i>@Model.Count sản phẩm
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="row row-cols-2 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3 g-lg-4">
                 @foreach (var p in Model)
                 {
-                    <div class="col-md-4 mb-3">
-                        <div class="card h-100 shadow-sm">
-
-                            <!-- CLICK ẢNH => DETAILS -->
-                            <a asp-controller="Home"
-                               asp-action="Details"
-                               asp-route-id="@p.ProductId">
-                                <img src="~/upload/@p.ImageUrl"
-                                     class="card-img-top"
-                                     style="height:180px; object-fit:cover" />
-                            </a>
-
-                            <div class="card-body text-center">
-                                <h6>@p.ProductName</h6>
-
-                                <p class="text-danger fw-bold">
-                                    @p.Price.ToString("N0") đ
-                                </p>
-                            </div>
-
-                            <div class="card-footer bg-white text-center">
-                                <a asp-area="Customer"
-                                   asp-controller="Cart"
-                                   asp-action="Add"
-                                   asp-route-id="@p.ProductId"
-                                   class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                    <div class="col">
+                        <div class="product-card">
+                            <div class="product-image-wrapper">
+                                <a asp-controller="Home" asp-action="Details" asp-route-id="@p.ProductId">
+                                    <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "https://via.placeholder.com/400x400?text=No+Image" : Url.Content("~/upload/" + p.ImageUrl))"
+                                         class="product-image"
+                                         alt="@p.ProductName"
+                                         loading="lazy">
                                 </a>
+
+                                <!-- Stock Badge -->
+                                @if (p.Stock == 0)
+                                {
+                                    <span class="product-badge badge-out-of-stock">
+                                        <i class="bi bi-x-circle me-1"></i>Hết hàng
+                                    </span>
+                                }
+                                else if (p.Stock < 10)
+                                {
+                                    <span class="product-badge badge-low-stock">
+                                        <i class="bi bi-exclamation-circle me-1"></i>Sắp hết
+                                    </span>
+                                }
+
+                                <!-- Quick Actions -->
+                                <div class="quick-actions">
+                                    <button class="quick-action-btn" title="Xem nhanh" type="button">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </button>
+                                    <button class="quick-action-btn" title="Yêu thích" type="button">
+                                        <i class="bi bi-heart-fill"></i>
+                                    </button>
+                                </div>
                             </div>
 
+                            <div class="product-body">
+                                <h5 class="product-title">
+                                    <a asp-controller="Home" asp-action="Details" asp-route-id="@p.ProductId">
+                                        @p.ProductName
+                                    </a>
+                                </h5>
+
+                                <div class="product-footer">
+                                    <div class="d-flex justify-content-between align-items-end">
+                                        <div>
+                                            <div class="product-price">@p.Price.ToString("N0")₫</div>
+                                            <div class="product-stock">
+                                                <i class="bi bi-box-seam"></i>
+                                                <span>Còn @p.Stock</span>
+                                            </div>
+                                        </div>
+                                        <a asp-area="Customer" asp-controller="Cart" asp-action="Add" asp-route-id="@p.ProductId"
+                                           class="add-to-cart-btn"
+                                           title="Thêm vào giỏ">
+                                            <i class="bi bi-cart-plus-fill fs-5"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 }

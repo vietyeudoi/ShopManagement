@@ -1,0 +1,79 @@
+﻿@model Sieu_Thi_Mini.Models.User
+
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Hồ sơ cá nhân";
+}
+
+<div class="container-fluid">
+    <h2 class="mb-2">Hồ sơ cá nhân</h2>
+    <p class="text-muted mb-4">Quản lý thông tin cá nhân</p>
+
+    <form method="post" id="profileForm" class="card shadow-sm p-4 mx-auto" style="max-width: 500px;">
+        <input type="hidden" asp-for="UserId" />
+
+        <div class="mb-3 d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-warning" id="btnEdit">
+                <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa
+            </button>
+        </div>
+
+        <h5 class="mb-3">Thông tin cá nhân</h5>
+
+        <div class="mb-3">
+            <label asp-for="FullName" class="form-label fw-bold">Họ và tên</label>
+            <input asp-for="FullName" class="form-control editable" disabled />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Phone" class="form-label fw-bold">Số điện thoại</label>
+            <input asp-for="Phone" class="form-control editable" disabled />
+        </div>
+
+        <hr />
+
+        <!-- ACTION BUTTONS -->
+        <div class="text-end mt-4">
+            <button type="button" class="btn btn-secondary d-none" id="btnCancel">
+                <i class="bi bi-x-circle me-1"></i> Huỷ
+            </button>
+
+            <button type="button" class="btn btn-primary d-none ms-2" id="btnSave">
+                <i class="bi bi-save me-1"></i> Lưu
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const btnEdit = document.getElementById("btnEdit");
+            const btnSave = document.getElementById("btnSave");
+            const btnCancel = document.getElementById("btnCancel");
+            const form = document.getElementById("profileForm");
+
+            btnEdit?.addEventListener("click", () => {
+                document.querySelectorAll(".editable").forEach(e => e.disabled = false);
+                btnEdit.classList.add("d-none");
+                btnSave.classList.remove("d-none");
+                btnCancel.classList.remove("d-none");
+            });
+
+            btnCancel?.addEventListener("click", () => location.reload());
+
+            btnSave?.addEventListener("click", () => {
+                const txtFullAddress = document.getElementById("txtFullAddress");
+                if (txtFullAddress && txtFullAddress.value) {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "ListAdress";
+                    input.value = txtFullAddress.value;
+                    form.appendChild(input);
+                }
+                form.submit();
+            });
+        });
+    </script>
+}

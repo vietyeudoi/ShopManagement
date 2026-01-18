@@ -25,28 +25,11 @@ public partial class Customer
     [StringLength(255)]
     public string Password { get; set; } = null!;
 
-    [StringLength(255)]
-    public string? Address { get; set; }
-
-    public bool? IsActive { get; set; }
+    public bool IsActive { get; set; }
 
     [InverseProperty("Customer")]
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
-    [NotMapped]
-    public List<string> ListAdress { get; set; }
-    
-    public void JAdress()
-    {
-        Address = System.Text.Json.JsonSerializer.Serialize(ListAdress);
-    }
-    public void LoadAdress()
-    {
-        //ListAdress = System.Text.Json.JsonSerializer.Deserialize<List<string>>(Address) ?? new List<string>();
-        ListAdress = string.IsNullOrEmpty(Address)
-           ? new List<string>()
-           : System.Text.Json.JsonSerializer.Deserialize<List<string>>(Address)
-             ?? new List<string>();
-    }
+    public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
 
 }

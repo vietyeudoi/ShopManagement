@@ -12,18 +12,12 @@ namespace Sieu_Thi_Mini.Areas.Customer.Controllers
         {
             var role = HttpContext.Session.GetString("Role");
 
-            if (role == "Customer")
+            ViewData["Layout"] = role switch
             {
-                ViewData["Layout"] = "_LayoutCustomer";
-            }
-            else if (role == "Admin")
-            {
-                ViewData["Layout"] = "_LayoutAdmin";
-            }
-            else
-            {
-                ViewData["Layout"] = "_Layout";
-            }
+                "Customer" => "_LayoutCustomer",
+                "Admin" => "_LayoutCustomer",
+                _ => "_Layout"
+            };
 
             base.OnActionExecuting(context);
         }

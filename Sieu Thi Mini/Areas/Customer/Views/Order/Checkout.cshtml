@@ -7,15 +7,17 @@
 
     var totalAmount = Model.Sum(x => x.Total);
 
-    // Khách hàng được truyền từ Controller
+    // ✅ Khách hàng được truyền từ Controller
     var customer = ViewBag.Customer as Customer;
-    var addresses = customer?.ListAdress ?? new List<string>();
+
+    // ✅ Lấy danh sách địa chỉ từ Addresses collection
+    var addresses = customer?.Addresses?.Select(a => a.Address1).ToList() ?? new List<string>();
 
     bool isMissingInfo =
         customer == null ||
         string.IsNullOrWhiteSpace(customer.FullName) ||
         string.IsNullOrWhiteSpace(customer.Phone) ||
-        string.IsNullOrWhiteSpace(customer.Address);
+        !addresses.Any();
 }
 
 <style>
@@ -56,6 +58,25 @@
         .btn-checkout:hover {
             background: #c4122d;
         }
+
+    .address-option {
+        padding: 10px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-bottom: 10px;
+    }
+
+        .address-option:hover {
+            border-color: #e31837;
+            background-color: #fff5f5;
+        }
+
+        .address-option input[type="radio"]:checked ~ label {
+            color: #e31837;
+            font-weight: 600;
+        }
 </style>
 
 <div class="checkout-body">
@@ -87,52 +108,80 @@
                             <input class="form-control" value="@customer?.Email" readonly />
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Số điện thoại</label>
-                                <input class="form-control" value="@customer?.Phone" readonly />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Địa chỉ giao hàng <span class="text-danger">*</span></label>
+                        <div class="mb-3">
+                            <label class="form-label">Số điện thoại</label>
+                            <input class="form-control" value="@customer?.Phone" readonly />
+                        </div>
 
-                                @if (addresses.Count > 1)
-                                {
-                                    <!-- 🔽 NHIỀU ĐỊA CHỈ -->
-                                    <select name="ShippingAddress" class="form-select" required>
-                                        @foreach (var addr in addresses)
-                                        {
-                                            <option value="@addr">@addr</option>
-                                        }
-                                    </select>
-                                }
-                                else if (addresses.Count == 1)
-                                {
-                                    <!-- 🔒 1 ĐỊA CHỈ -->
+                        <div class="mb-3">
+                            <label class="form-label">Địa chỉ giao hàng <span class="text-danger">*</span></label>
+
+                            @if (addresses.Count > 1)
+                            {
+                                <!-- 🔽 NHIỀU ĐỊA CHỈ - Hiển thị dạng radio buttons -->
+                                <div class="address-list">
+                                    @for (int i = 0; i < addresses.Count; i++)
+                                    {
+                                        var address = addresses[i];
+                                        var isFirst = i == 0;
+
+                                        <div class="address-option">
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                       type="radio"
+                                                       name="ShippingAddress"
+                                                       id="address_@i"
+                                                       value="@address"
+                                                       checked="@isFirst"
+                                                       required />
+                                                <label class="form-check-label w-100" for="address_@i">
+                                                    <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                                                    @address
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle"></i>
+                                    Chọn địa chỉ giao hàng
+                                </small>
+                            }
+                            else if (addresses.Count == 1)
+                            {
+                                <!-- 🔒 1 ĐỊA CHỈ -->
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-geo-alt-fill text-danger"></i>
+                                    </span>
                                     <input class="form-control"
                                            name="ShippingAddress"
                                            value="@addresses[0]"
                                            readonly />
-                                }
-                                else
-                                {
-                                    <!-- ❌ KHÔNG CÓ ĐỊA CHỈ -->
-                                    <input class="form-control"
-                                           value="Chưa có địa chỉ giao hàng"
-                                           readonly />
+                                </div>
+                            }
+                            else
+                            {
+                                <!-- ❌ KHÔNG CÓ ĐỊA CHỈ -->
+                                <div class="alert alert-warning mb-0">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Bạn chưa có địa chỉ giao hàng nào.
+                                </div>
 
-                                    <a href="/Customer/Profile"
-                                       class="btn btn-outline-danger mt-2 w-100">
-                                        Cập nhật thông tin giao hàng
-                                    </a>
-                                }
-                            </div>
+                                <a href="/Customer/Profile"
+                                   class="btn btn-outline-danger mt-2 w-100">
+                                    <i class="bi bi-plus-circle me-2"></i>
+                                    Thêm địa chỉ giao hàng
+                                </a>
+                            }
                         </div>
 
                         @if (isMissingInfo)
                         {
-                            <div class="alert alert-warning mt-3">
-                                <i class="bi bi-exclamation-triangle"></i>
-                                Vui lòng cập nhật đầy đủ thông tin giao hàng trước khi đặt hàng.
+                            <div class="alert alert-danger mt-3 mb-0">
+                                <i class="bi bi-exclamation-circle me-2"></i>
+                                <strong>Vui lòng cập nhật đầy đủ thông tin giao hàng trước khi đặt hàng.</strong>
                             </div>
                         }
                     </div>
@@ -140,18 +189,35 @@
                     <div class="checkout-card">
                         <h4 class="checkout-title">Phương thức thanh toán</h4>
 
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="paymentMethod" value="COD" checked />
-                            <label class="form-check-label fw-bold">
-                                <i class="bi bi-cash-stack me-2"></i> Thanh toán khi nhận hàng (COD)
+                        <div class="form-check mb-3 p-3 border rounded">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="paymentMethod"
+                                   id="payment_cod"
+                                   value="COD"
+                                   checked />
+                            <label class="form-check-label fw-bold" for="payment_cod">
+                                <i class="bi bi-cash-stack me-2 text-success"></i>
+                                Thanh toán khi nhận hàng (COD)
                             </label>
+                            <small class="d-block text-muted mt-1 ms-4">
+                                Thanh toán bằng tiền mặt khi nhận hàng
+                            </small>
                         </div>
 
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="paymentMethod" value="Bank" />
-                            <label class="form-check-label fw-bold">
-                                <i class="bi bi-bank me-2"></i> Chuyển khoản ngân hàng / ví điện tử
+                        <div class="form-check p-3 border rounded">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="paymentMethod"
+                                   id="payment_bank"
+                                   value="Bank" />
+                            <label class="form-check-label fw-bold" for="payment_bank">
+                                <i class="bi bi-bank me-2 text-primary"></i>
+                                Chuyển khoản ngân hàng / ví điện tử
                             </label>
+                            <small class="d-block text-muted mt-1 ms-4">
+                                Thanh toán qua ngân hàng hoặc ví điện tử
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -159,40 +225,66 @@
                 <!-- RIGHT -->
                 <div class="col-lg-5">
                     <div class="checkout-card position-sticky" style="top:20px">
-                        <h4 class="checkout-title">Đơn hàng</h4>
+                        <h4 class="checkout-title">
+                            <i class="bi bi-bag-check me-2"></i>
+                            Đơn hàng của bạn
+                        </h4>
 
-                        @foreach (var item in Model)
-                        {
+                        <div class="order-items mb-3">
+                            @foreach (var item in Model)
+                            {
+                                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold">@item.ProductName</div>
+                                        <small class="text-muted">Số lượng: @item.Quantity</small>
+                                    </div>
+                                    <strong class="text-danger">@item.Total.ToString("N0") ₫</strong>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="summary-section pt-3 border-top">
                             <div class="d-flex justify-content-between mb-2">
-                                <span>@item.ProductName (x@item.Quantity)</span>
-                                <strong>@item.Total.ToString("N0") ₫</strong>
+                                <span class="text-muted">Tạm tính</span>
+                                <span>@totalAmount.ToString("N0") ₫</span>
                             </div>
-                        }
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="text-muted">Phí vận chuyển</span>
+                                <span class="text-success">Miễn phí</span>
+                            </div>
+                        </div>
 
-                        <hr />
+                        <hr class="my-3" />
 
-                        <div class="d-flex justify-content-between fs-5 fw-bold text-danger">
+                        <div class="d-flex justify-content-between fs-5 fw-bold text-danger mb-4">
                             <span>Tổng cộng</span>
                             <span>@totalAmount.ToString("N0") ₫</span>
                         </div>
 
-                        <div class="mt-4">
+                        <div class="d-grid gap-2">
                             @if (isMissingInfo)
                             {
                                 <a asp-controller="Profile"
                                    asp-action="Index"
                                    asp-area="Customer"
-                                   class="btn btn-warning w-100">
-                                    <i class="bi bi-pencil-square"></i> Cập nhật thông tin giao hàng
+                                   class="btn btn-warning btn-lg">
+                                    <i class="bi bi-pencil-square me-2"></i>
+                                    Cập nhật thông tin giao hàng
                                 </a>
                             }
                             else
                             {
-                                <button type="submit" class="btn btn-checkout w-100">
+                                <button type="submit" class="btn btn-checkout btn-lg">
+                                    <i class="bi bi-check-circle me-2"></i>
                                     Xác nhận đặt hàng
                                 </button>
                             }
                         </div>
+
+                        <small class="text-muted d-block text-center mt-3">
+                            <i class="bi bi-shield-check me-1"></i>
+                            Thông tin của bạn được bảo mật
+                        </small>
                     </div>
                 </div>
 

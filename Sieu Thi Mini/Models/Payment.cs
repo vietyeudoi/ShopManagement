@@ -18,12 +18,12 @@ public partial class Payment
     public PaymentMethodEnum PaymentMethod { get; set; }
 
     public enum PaymentMethodEnum
-        {
+    {
         COD,
         Bank,
-        Cash,
-        
-        }
+        Cash
+
+    }
 
     [Column(TypeName = "datetime")]
     public DateTime? PaymentDate { get; set; }

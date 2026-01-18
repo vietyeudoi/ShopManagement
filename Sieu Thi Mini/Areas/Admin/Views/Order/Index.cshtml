@@ -7,48 +7,93 @@
     ViewData["Title"] = "Quản lý đơn hàng";
 }
 
-<h2 class="mb-4">Quản lý đơn hàng</h2>
+<div class="container-fluid">
 
-<table class="table table-bordered table-hover align-middle">
-    <thead class="table-dark">
-        <tr>
-            <th>#</th>
-            <th>Khách hàng</th>
-            <th>Nhân viên</th>
-            <th>Ngày đặt</th>
-            <th class="text-end">Tổng tiền</th>
-            <th class="text-center">Trạng thái</th>
-            <th class="text-center">Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var order in Model)
-        {
-            <tr>
-                <td>@order.OrderId</td>
-                <td>@order.Customer?.FullName</td>
-                <td>@order.User?.FullName</td>
-                <td>
-                    @(order.OrderDate?.ToString("dd/MM/yyyy HH:mm"))
-                </td>
-                <td class="text-end fw-bold text-danger">
-                    @order.TotalAmount.ToString("N0") đ
-                </td>
-                <td class="text-center">
-                    <span class="badge @order.Status.ToBadge()">
-                        @order.Status.ToVietnamese()
-                    </span>
-                </td>
-                <td class="text-center">
-                    <a asp-area="Admin"
-                       asp-controller="Order"
-                       asp-action="Details"
-                       asp-route-id="@order.OrderId"
-                       class="btn btn-sm btn-primary">
-                        Chi tiết
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-0">📑 Quản lý đơn hàng</h3>
+            <small class="text-muted">Theo dõi và quản lý các đơn hàng trong hệ thống</small>
+        </div>
+    </div>
+
+    <!-- CARD -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-center">
+                    <tr>
+                        <th style="width:80px">Mã</th>
+                        <th>Khách hàng</th>
+                        <th>Nhân viên</th>
+                        <th>Ngày đặt</th>
+                        <th class="text-end">Tổng tiền</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th style="width:120px" class="text-center">Hành động</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        <tr>
+                            <!-- ORDER ID -->
+                            <td class="text-center fw-semibold">
+                                #@order.OrderId
+                            </td>
+
+                            <!-- CUSTOMER -->
+                            <td>
+                                <div class="fw-semibold">@order.Customer?.FullName</div>
+                                <small class="text-muted">Khách hàng</small>
+                            </td>
+
+                            <!-- STAFF -->
+                            <td>
+                                @if (order.User != null)
+                                {
+                                    <span>@order.User.FullName</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">Chưa gán</span>
+                                }
+                            </td>
+
+                            <!-- DATE -->
+                            <td>
+                                @(order.OrderDate?.ToString("dd/MM/yyyy HH:mm"))
+                            </td>
+
+                            <!-- TOTAL -->
+                            <td class="text-end fw-bold text-danger">
+                                @order.TotalAmount.ToString("N0") ₫
+                            </td>
+
+                            <!-- STATUS -->
+                            <td class="text-center">
+                                <span class="badge @order.Status.ToBadge() px-3 py-2">
+                                    @order.Status.ToVietnamese()
+                                </span>
+                            </td>
+
+                            <!-- ACTION -->
+                            <td class="text-center">
+                                <a asp-area="Admin"
+                                   asp-controller="Order"
+                                   asp-action="Details"
+                                   asp-route-id="@order.OrderId"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> Chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+</div>

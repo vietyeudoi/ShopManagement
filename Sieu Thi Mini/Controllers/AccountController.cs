@@ -12,18 +12,27 @@ namespace Sieu_Thi_Mini.Controllers
         {
             _context = context;
         }
+        [Route("/Login")]
         public IActionResult Login()
         {
             return View();
         }
+        [Route("/Login")]
         [HttpPost]
         public IActionResult Login(string email, string password)
         {
+            var returnUrl = HttpContext.Session.GetString("ReturnUrl");
+            // 🔹 LOGIN USER (Admin / Staff)
             var user = _context.Users.FirstOrDefault(u => u.Email == email && u.IsActive == true);
             if (user != null && PasswordHelper.VerifyPassword(password, user.Password))
             {
                 SignInUser(user);
+                
+                // ✅ Nếu có trang trước → quay lại
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    return Redirect(returnUrl);
 
+                // ❌ Không có → redirect mặc định
                 if (user.Role == "Admin")
                     return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
 
@@ -31,23 +40,31 @@ namespace Sieu_Thi_Mini.Controllers
                     return RedirectToAction("Index", "Home", new { area = "Staff" });
             }
 
-            var customer = _context.Customers.FirstOrDefault(c => c.Email == email && c.IsActive == true );
+            // 🔹 LOGIN CUSTOMER
+            var customer = _context.Customers.FirstOrDefault(c => c.Email == email && c.IsActive == true);
             if (customer != null && PasswordHelper.VerifyPassword(password, customer.Password))
             {
                 SignInCustomer(customer);
+                
+                // ✅ Ưu tiên quay lại trang trước
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    return Redirect(returnUrl);
 
-                return RedirectToAction("Index", "Home", new { area = "" });
+                return RedirectToAction("Index", "Home");
             }
+
             ViewBag.Error = "Email hoặc mật khẩu không đúng";
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
+        [Route("Register")]
         public IActionResult Register()
         {
             return View();
         }
 
-        [HttpPost]
+        [Route("/Register")]
         [HttpPost]
         public IActionResult Register(string fullName, string email, string password)
         {

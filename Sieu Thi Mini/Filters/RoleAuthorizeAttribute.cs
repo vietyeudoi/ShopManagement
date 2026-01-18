@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Http;
 
 namespace Sieu_Thi_Mini.Filters
 {
@@ -14,17 +15,17 @@ namespace Sieu_Thi_Mini.Filters
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            var controller = context.RouteData.Values["controller"]?.ToString();
-
-            // Bỏ qua AccountController
-            if (controller == "Account")
-                return;
-
             var session = context.HttpContext.Session;
             var role = session.GetString("Role");
 
+            // ❌ Chưa đăng nhập
             if (string.IsNullOrEmpty(role))
             {
+                var request = context.HttpContext.Request;
+                var returnUrl = request.Path + request.QueryString;
+
+                session.SetString("ReturnUrl", returnUrl);
+
                 context.Result = new RedirectToActionResult(
                     "Login",
                     "Account",
@@ -33,9 +34,9 @@ namespace Sieu_Thi_Mini.Filters
                 return;
             }
 
-            if (!role.Equals(_role, StringComparison.OrdinalIgnoreCase))
+            // ❌ Sai role
+            if (role != _role)
             {
-                session.Clear();
                 context.Result = new RedirectToActionResult(
                     "Login",
                     "Account",
@@ -43,6 +44,5 @@ namespace Sieu_Thi_Mini.Filters
                 );
             }
         }
-
     }
 }

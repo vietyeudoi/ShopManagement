@@ -4,98 +4,542 @@
     int? currentCategory = ViewBag.CategoryId;
     string keyword = ViewBag.Keyword as string;
     Layout = ViewData["Layout"]?.ToString() ?? "_Layout";
+    ViewData["Title"] = "Tìm kiếm sản phẩm";
 }
 
-<div class="row">
+<style>
+    :root {
+        --primary: #e63946;
+        --primary-dark: #d00000;
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+        --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-    <!-- BÊN TRÁI: DANH MỤC -->
-    <div class="col-md-3">
-        <div class="card shadow-sm mb-3">
-            <div class="card-header bg-danger text-white">
-                Danh mục
-            </div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item @(ViewBag.CategoryId == null ? "active" : "")">
-                    <a class="text-decoration-none d-block @(ViewBag.CategoryId == null ? "text-white" : "")"
-                       asp-action="Search">
-                        Tất cả
-                    </a>
-                </li>
+    /* ========== BREADCRUMB ========== */
+    .custom-breadcrumb {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #f0f0f0;
+        margin-bottom: 2rem;
+    }
 
-                @foreach (var c in categories)
-                {
-                    <li class="list-group-item @(ViewBag.CategoryId == c.CategoryId ? "active" : "")">
-                        <a class="text-decoration-none d-block @(ViewBag.CategoryId == c.CategoryId ? "text-white" : "")"
-                           asp-action="Search"
-                           asp-route-categoryId="@c.CategoryId">
-                            @c.CategoryName
+    .breadcrumb-item a {
+        color: #6c757d;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+        .breadcrumb-item a:hover {
+            color: var(--primary);
+        }
+
+    .breadcrumb-item.active {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    /* ========== SIDEBAR CATEGORIES ========== */
+    .category-sidebar {
+        position: sticky;
+        top: 90px;
+        z-index: 10;
+    }
+
+    .category-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+    }
+
+        .category-card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+    .category-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        padding: 1.25rem 1.5rem;
+        border: none;
+    }
+
+    .category-item {
+        border: none;
+        border-bottom: 1px solid #f0f0f0;
+        padding: 1rem 1.5rem;
+        transition: var(--transition);
+        cursor: pointer;
+        position: relative;
+    }
+
+        .category-item:last-child {
+            border-bottom: none;
+        }
+
+        .category-item a {
+            color: #495057;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .category-item:hover {
+            background: rgba(230, 57, 70, 0.05);
+            padding-left: 2rem;
+        }
+
+            .category-item:hover a {
+                color: var(--primary);
+            }
+
+        .category-item.active {
+            background: rgba(230, 57, 70, 0.1);
+            border-left: 4px solid var(--primary);
+        }
+
+            .category-item.active a {
+                color: var(--primary);
+                font-weight: 600;
+            }
+
+        .category-item i {
+            transition: var(--transition);
+            font-size: 1.125rem;
+        }
+
+        .category-item:hover i {
+            transform: translateX(5px);
+        }
+
+    /* ========== SEARCH RESULTS HEADER ========== */
+    .search-results-header {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem 2rem;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 2rem;
+    }
+
+    .search-title {
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 1.75rem;
+        margin-bottom: 0;
+    }
+
+    .search-keyword {
+        color: #6c757d;
+        font-weight: 400;
+        font-style: italic;
+    }
+
+    .search-count {
+        background: rgba(230, 57, 70, 0.1);
+        color: var(--primary);
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9375rem;
+    }
+
+    /* ========== EMPTY STATE ========== */
+    .empty-state {
+        background: white;
+        border-radius: 16px;
+        padding: 4rem 2rem;
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .empty-state-icon {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 2rem;
+        background: linear-gradient(135deg, rgba(230, 57, 70, 0.1), rgba(230, 57, 70, 0.05));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: var(--primary);
+    }
+
+    .empty-state h4 {
+        color: #212529;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: #6c757d;
+        margin-bottom: 2rem;
+    }
+
+    .btn-back-home {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border: none;
+        border-radius: 50px;
+        padding: 0.875rem 2rem;
+        color: white;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+    }
+
+        .btn-back-home:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: white;
+        }
+
+    /* ========== PRODUCT CARD ========== */
+    .product-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: var(--transition);
+        box-shadow: var(--shadow-sm);
+        height: 100%;
+        background: white;
+    }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(230, 57, 70, 0.15);
+        }
+
+    .product-image-wrapper {
+        position: relative;
+        overflow: hidden;
+        background: #f8f9fa;
+        aspect-ratio: 1;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.1);
+    }
+
+    .product-body {
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .product-title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 2.8em;
+        line-height: 1.4;
+    }
+
+        .product-title a {
+            color: #212529;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+            .product-title a:hover {
+                color: var(--primary);
+            }
+
+    .product-price {
+        color: var(--primary);
+        font-size: 1.375rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .product-stock {
+        color: #6c757d;
+        font-size: 0.8125rem;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .product-footer {
+        padding: 0 1.25rem 1.25rem;
+        margin-top: auto;
+    }
+
+    .add-to-cart-btn {
+        width: 100%;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border: none;
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9375rem;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+        .add-to-cart-btn:hover {
+            background: linear-gradient(135deg, var(--primary-dark), #b00000);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: white;
+        }
+
+    /* ========== RESPONSIVE ========== */
+    @@media (max-width: 991.98px) {
+        .category-sidebar {
+            position: static;
+            margin-bottom: 2rem;
+        }
+
+        .search-title {
+            font-size: 1.5rem;
+        }
+
+        .search-results-header {
+            padding: 1.25rem 1.5rem;
+        }
+    }
+
+    @@media (max-width: 575.98px) {
+        .search-title {
+            font-size: 1.25rem;
+        }
+
+        .search-results-header {
+            padding: 1rem;
+        }
+
+        .product-price {
+            font-size: 1.125rem;
+        }
+    }
+
+    /* ========== ANIMATIONS ========== */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .product-card {
+        animation: fadeInUp 0.5s ease-out backwards;
+    }
+
+        .product-card:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .product-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .product-card:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .product-card:nth-child(4) {
+            animation-delay: 0.2s;
+        }
+
+        .product-card:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+
+        .product-card:nth-child(6) {
+            animation-delay: 0.3s;
+        }
+
+        .product-card:nth-child(7) {
+            animation-delay: 0.35s;
+        }
+
+        .product-card:nth-child(8) {
+            animation-delay: 0.4s;
+        }
+
+        .product-card:nth-child(9) {
+            animation-delay: 0.45s;
+        }
+</style>
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb custom-breadcrumb mb-0">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">
+                <i class="bi bi-house-door-fill me-2"></i>Trang chủ
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            Kết quả tìm kiếm
+        </li>
+    </ol>
+</nav>
+
+<div class="row g-4">
+    <!-- ========== SIDEBAR - DANH MỤC ========== -->
+    <div class="col-lg-3">
+        <div class="category-sidebar">
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="d-flex align-items-center gap-3 text-white">
+                        <i class="bi bi-funnel-fill fs-3"></i>
+                        <h5 class="mb-0 fw-bold">Lọc theo danh mục</h5>
+                    </div>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="category-item @(currentCategory == null ? "active" : "")">
+                        <a asp-action="Search" asp-route-keyword="@keyword">
+                            <i class="bi bi-grid-3x3-gap-fill"></i>
+                            <span>Tất cả sản phẩm</span>
                         </a>
                     </li>
-                }
-            </ul>
-
+                    @foreach (var c in categories)
+                    {
+                        <li class="category-item @(currentCategory == c.CategoryId ? "active" : "")">
+                            <a asp-action="Search"
+                               asp-route-categoryId="@c.CategoryId"
+                               asp-route-keyword="@keyword">
+                                <i class="bi bi-tag-fill"></i>
+                                <span>@c.CategoryName</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
         </div>
     </div>
 
-    <!-- BÊN PHẢI: KẾT QUẢ -->
-    <div class="col-md-9">
-
-        <h5 class="mb-3">
-            Kết quả tìm kiếm
-            @if (!string.IsNullOrEmpty(keyword))
-            {
-                <span class="text-muted">: "@keyword"</span>
-            }
-        </h5>
+    <!-- ========== MAIN CONTENT - KẾT QUẢ ========== -->
+    <div class="col-lg-9">
+        <!-- Search Results Header -->
+        <div class="search-results-header">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h1 class="search-title">
+                        Kết quả tìm kiếm
+                        @if (!string.IsNullOrEmpty(keyword))
+                        {
+                            <span class="search-keyword">"@keyword"</span>
+                        }
+                    </h1>
+                    @if (currentCategory != null)
+                    {
+                        var categoryName = categories?.FirstOrDefault(c => c.CategoryId == currentCategory)?.CategoryName;
+                        if (!string.IsNullOrEmpty(categoryName))
+                        {
+                            <p class="text-muted mb-0 mt-2">
+                                <i class="bi bi-tag me-2"></i>Danh mục: <strong>@categoryName</strong>
+                            </p>
+                        }
+                    }
+                </div>
+                <div class="search-count">
+                    <i class="bi bi-box-seam me-2"></i>@Model.Count sản phẩm
+                </div>
+            </div>
+        </div>
 
         @if (!Model.Any())
         {
-            <div class="alert alert-warning">
-                Không tìm thấy sản phẩm
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-search"></i>
+                </div>
+                <h4>Không tìm thấy sản phẩm</h4>
+                <p class="mb-0">
+                    @if (!string.IsNullOrEmpty(keyword))
+                    {
+                        <span>Không tìm thấy sản phẩm nào với từ khóa "<strong>@keyword</strong>"</span>
+                    }
+                    else
+                    {
+                        <span>Không có sản phẩm nào trong danh mục này</span>
+                    }
+                    <br />
+                    <span class="text-muted">Vui lòng thử lại với từ khóa khác hoặc xem tất cả sản phẩm.</span>
+                </p>
+                <a asp-controller="Home" asp-action="Index" class="btn-back-home mt-4">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Quay lại trang chủ</span>
+                </a>
             </div>
         }
         else
         {
-            <div class="row">
+            <!-- Products Grid -->
+            <div class="row row-cols-2 row-cols-md-2 row-cols-lg-3 g-3 g-lg-4">
                 @foreach (var p in Model)
                 {
-                    <div class="col-md-4 mb-3">
-                        <div class="card h-100 shadow-sm">
+                    <div class="col">
+                        <div class="product-card">
+                            <div class="product-image-wrapper">
+                                <a asp-controller="Home" asp-action="Details" asp-route-id="@p.ProductId">
+                                    <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "https://via.placeholder.com/400x400?text=No+Image" : Url.Content("~/upload/" + p.ImageUrl))"
+                                         class="product-image"
+                                         alt="@p.ProductName"
+                                         loading="lazy">
+                                </a>
+                            </div>
 
-                            <!-- CLICK ẢNH → XEM CHI TIẾT -->
-                            <a asp-controller="Home"
-                               asp-action="Details"
-                               asp-route-id="@p.ProductId"
-                               class="text-decoration-none">
-                                @if (!string.IsNullOrEmpty(p.ImageUrl))
-                                {
-                                    <img src="~/upload/@p.ImageUrl"
-                                         class="card-img-top"
-                                         style="height:180px; object-fit:cover" />
-                                }
-                                else
-                                {
-                                    <img src="~/images/no-image.png"
-                                         class="card-img-top"
-                                         style="height:180px; object-fit:cover" />
-                                }
-                            </a>
+                            <div class="product-body">
+                                <h5 class="product-title">
+                                    <a asp-controller="Home" asp-action="Details" asp-route-id="@p.ProductId">
+                                        @p.ProductName
+                                    </a>
+                                </h5>
 
-                            <div class="card-body text-center">
-                                <h6 class="card-title">@p.ProductName</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="product-price">@p.Price.ToString("N0")₫</div>
+                                </div>
 
-                                <p class="text-danger fw-bold mb-2">
-                                    @p.Price.ToString("N0") đ
-                                </p>
+                                <div class="product-stock">
+                                    <i class="bi bi-box-seam"></i>
+                                    <span>Còn @p.Stock sản phẩm</span>
+                                </div>
+                            </div>
 
-                                <!-- THÊM VÀO GIỎ -->
+                            <div class="product-footer">
                                 <form asp-area="Customer"
                                       asp-controller="Cart"
                                       asp-action="Add"
                                       method="post">
                                     <input type="hidden" name="id" value="@p.ProductId" />
-                                    <button type="submit" class="btn btn-sm btn-danger w-100">
-                                        <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                                    <button type="submit" class="add-to-cart-btn">
+                                        <i class="bi bi-cart-plus"></i>
+                                        <span>Thêm vào giỏ</span>
                                     </button>
                                 </form>
                             </div>
@@ -103,8 +547,6 @@
                     </div>
                 }
             </div>
-
         }
     </div>
-
 </div>

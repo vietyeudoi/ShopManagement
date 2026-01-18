@@ -1,4 +1,5 @@
 ﻿@using Sieu_Thi_Mini.Helpers
+@using Sieu_Thi_Mini.Models
 @model Sieu_Thi_Mini.Models.Order
 
 @{
@@ -11,10 +12,10 @@
 <!-- INFO ROW -->
 <div class="row mb-4">
     <!-- ORDER INFO -->
-    <div class="col-md-6">
-        <div class="card shadow-sm">
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm border-0">
             <div class="card-header bg-primary text-white">
-                Thông tin đơn hàng
+                <h6 class="mb-0"><i class="bi bi-receipt me-2"></i>Thông tin đơn hàng</h6>
             </div>
             <div class="card-body">
                 <p><strong>Khách hàng:</strong> @Model.Customer?.FullName</p>
@@ -51,8 +52,8 @@
                         }
                     </select>
 
-                    <button type="submit" class="btn btn-success">
-                        Cập nhật
+                    <button type="submit" class="btn btn-success btn-sm">
+                        <i class="bi bi-save me-1"></i> Cập nhật
                     </button>
                 </form>
             </div>
@@ -60,10 +61,10 @@
     </div>
 
     <!-- PAYMENT INFO -->
-    <div class="col-md-6">
-        <div class="card shadow-sm">
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm border-0">
             <div class="card-header bg-success text-white">
-                Thông tin thanh toán
+                <h6 class="mb-0"><i class="bi bi-credit-card me-2"></i>Thông tin thanh toán</h6>
             </div>
             <div class="card-body">
 
@@ -81,7 +82,6 @@
                             @Model.Payment.PaymentStatus.ToVietnamese()
                         </span>
                     </p>
-
                     <p>
                         <strong>Ngày thanh toán:</strong>
                         @Model.Payment.PaymentDate?.ToString("dd/MM/yyyy HH:mm")
@@ -106,8 +106,8 @@
                             }
                         </select>
 
-                        <button type="submit" class="btn btn-success">
-                            Cập nhật
+                        <button type="submit" class="btn btn-success btn-sm">
+                            <i class="bi bi-save me-1"></i> Cập nhật
                         </button>
                     </form>
                 }
@@ -119,12 +119,12 @@
             </div>
         </div>
     </div>
-
+</div>
 
 <!-- PRODUCT LIST -->
-<div class="card shadow-sm mb-4">
+<div class="card shadow-sm border-0 mb-4">
     <div class="card-header bg-dark text-white">
-        Danh sách sản phẩm
+        <h6 class="mb-0"><i class="bi bi-box-seam me-2"></i>Danh sách sản phẩm</h6>
     </div>
     <div class="card-body p-0">
         <table class="table table-bordered mb-0">
@@ -157,5 +157,5 @@
    asp-controller="Order"
    asp-action="Index"
    class="btn btn-secondary">
-    Quay lại danh sách
+    <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
 </a>
