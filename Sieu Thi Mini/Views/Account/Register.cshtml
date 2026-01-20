@@ -1,79 +1,413 @@
 ﻿@{
     ViewData["Title"] = "Đăng ký";
-    Layout = "_Layout"; // hoặc null nếu muốn form riêng
+    Layout = "_Layout";
 }
 
-<div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
-    <div class="card shadow-lg p-4" style="width: 100%; max-width: 350px;">
-        <!-- giảm max-width -->
-        <div class="text-center mb-4">
-            <h3 class="fw-bold">📝 Đăng ký</h3>
-            <p class="text-muted mb-0">Tạo tài khoản mới</p>
-        </div>
+<style>
+    :root {
+        --primary: #e63946;
+        --primary-dark: #d00000;
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+        --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+        --shadow-xl: 0 12px 48px rgba(0,0,0,0.15);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-        @if (ViewBag.Error != null)
-        {
-            <div class="alert alert-danger">
-                <i class="bi bi-exclamation-triangle-fill me-1"></i>@ViewBag.Error
-            </div>
+    /* ========== REGISTER CONTAINER ========== */
+    .register-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 1rem;
+        position: relative;
+    }
+
+        .register-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(230, 57, 70, 0.03) 0%, rgba(230, 57, 70, 0.01) 100%), radial-gradient(circle at 20% 50%, rgba(230, 57, 70, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(230, 57, 70, 0.05) 0%, transparent 50%);
+            pointer-events: none;
         }
 
-        <form asp-action="Register" asp-controller="Account" method="post">
+    /* ========== REGISTER CARD ========== */
+    .register-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        width: 100%;
+        max-width: 480px;
+        position: relative;
+        animation: fadeInUp 0.6s ease-out;
+    }
 
-            <div class="mb-3">
-                <label class="form-label fw-bold">Họ và tên</label>
-                <input type="text"
-                       name="fullName"
-                       class="form-control"
-                       placeholder="Nhập họ tên"
-                       required />
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ========== CARD HEADER ========== */
+    .register-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        padding: 3rem 2.5rem 2.5rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .register-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+    @@keyframes shimmer {
+        0%, 100% {
+            transform: translate(0, 0);
+        }
+
+        50% {
+            transform: translate(-20px, -20px);
+        }
+    }
+
+    .register-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        backdrop-filter: blur(10px);
+        position: relative;
+        z-index: 1;
+    }
+
+    .register-title {
+        color: white;
+        font-weight: 700;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .register-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ========== CARD BODY ========== */
+    .register-body {
+        padding: 2.5rem;
+    }
+
+    /* ========== ALERT ========== */
+    .custom-alert {
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
+        border: 2px solid rgba(220, 53, 69, 0.2);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        color: #dc3545;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        animation: shake 0.5s;
+    }
+
+    @@keyframes shake {
+        0%, 100% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-10px);
+        }
+
+        75% {
+            transform: translateX(10px);
+        }
+    }
+
+    .custom-alert i {
+        font-size: 1.5rem;
+    }
+
+    /* ========== FORM ELEMENTS ========== */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .form-label i {
+            color: var(--primary);
+            font-size: 1.125rem;
+        }
+
+    .form-control-wrapper {
+        position: relative;
+    }
+
+    .form-control-icon {
+        position: absolute;
+        left: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 1.125rem;
+        pointer-events: none;
+        transition: var(--transition);
+    }
+
+    .form-control {
+        height: 56px;
+        padding: 0.875rem 1.25rem 0.875rem 3.25rem;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: var(--transition);
+        background: #f8f9fa;
+    }
+
+        .form-control:focus {
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(230, 57, 70, 0.1);
+            outline: none;
+        }
+
+            .form-control:focus ~ .form-control-icon {
+                color: var(--primary);
+            }
+
+    /* ========== PASSWORD HINT ========== */
+    .password-hint {
+        font-size: 0.8125rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .password-hint i {
+            color: var(--primary);
+        }
+
+    /* ========== BUTTON ========== */
+    .btn-register {
+        height: 56px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 700;
+        font-size: 1.125rem;
+        width: 100%;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-top: 2rem;
+    }
+
+        .btn-register:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #b00000 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: white;
+        }
+
+        .btn-register:active {
+            transform: translateY(0);
+        }
+
+    /* ========== FOOTER LINKS ========== */
+    .register-footer {
+        text-align: center;
+        padding-top: 1.5rem;
+        border-top: 2px solid #f0f0f0;
+        margin-top: 2rem;
+    }
+
+    .register-footer-text {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    .register-footer-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 700;
+        transition: var(--transition);
+    }
+
+        .register-footer-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+    /* ========== RESPONSIVE ========== */
+    @@media (max-width: 575.98px) {
+        .register-container {
+            padding: 2rem 1rem;
+        }
+
+        .register-header {
+            padding: 2rem 1.5rem 1.5rem;
+        }
+
+        .register-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .register-title {
+            font-size: 1.5rem;
+        }
+
+        .register-body {
+            padding: 2rem 1.5rem;
+        }
+
+        .form-control,
+        .btn-register {
+            height: 50px;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+    }
+</style>
+
+<div class="register-container">
+    <div class="register-card">
+        <!-- Card Header -->
+        <div class="register-header">
+            <div class="register-icon">
+                <i class="bi bi-person-plus-fill text-white"></i>
             </div>
+            <h1 class="register-title">Đăng ký</h1>
+            <p class="register-subtitle">Tạo tài khoản mới</p>
+        </div>
 
-            <div class="mb-3">
-                <label class="form-label fw-bold">Email</label>
-                <input type="email"
-                       name="email"
-                       class="form-control"
-                       placeholder="example@gmail.com"
-                       required />
-            </div>
+        <!-- Card Body -->
+        <div class="register-body">
+            @if (ViewBag.Error != null)
+            {
+                <div class="custom-alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>@ViewBag.Error</span>
+                </div>
+            }
 
-            <div class="mb-3">
-                <label class="form-label fw-bold">Mật khẩu</label>
-                <input type="password"
-                       name="password"
-                       class="form-control"
-                       placeholder="Tối thiểu 6 ký tự"
-                       required minlength="6" />
-            </div>
+            <form asp-action="Register" asp-controller="Account" method="post">
+                <!-- Full Name Field -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-person-fill"></i>
+                        Họ và tên
+                    </label>
+                    <div class="form-control-wrapper">
+                        <input type="text"
+                               name="fullName"
+                               class="form-control"
+                               placeholder="Nguyễn Văn A"
+                               required />
+                        <i class="bi bi-person-badge form-control-icon"></i>
+                    </div>
+                </div>
 
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary fw-bold">
-                    Đăng ký
+                <!-- Email Field -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-envelope-fill"></i>
+                        Email
+                    </label>
+                    <div class="form-control-wrapper">
+                        <input type="email"
+                               name="email"
+                               class="form-control"
+                               placeholder="example@email.com"
+                               required />
+                        <i class="bi bi-at form-control-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-lock-fill"></i>
+                        Mật khẩu
+                    </label>
+                    <div class="form-control-wrapper">
+                        <input type="password"
+                               name="password"
+                               class="form-control"
+                               placeholder="Nhập mật khẩu của bạn"
+                               required
+                               minlength="6" />
+                        <i class="bi bi-key-fill form-control-icon"></i>
+                    </div>
+                    <div class="password-hint">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <span>Mật khẩu tối thiểu 6 ký tự</span>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-register">
+                    <i class="bi bi-person-check-fill"></i>
+                    <span>Đăng ký</span>
                 </button>
-            </div>
-        </form>
 
-        <div class="text-center mt-3">
-            <span class="text-muted">Đã có tài khoản?</span>
-            <a asp-action="Login" asp-controller="Account" class="fw-bold ms-1">Đăng nhập</a>
+                <!-- Footer -->
+                <div class="register-footer">
+                    <p class="register-footer-text">
+                        Đã có tài khoản?
+                        <a asp-action="Login" asp-controller="Account" class="register-footer-link">
+                            Đăng nhập ngay
+                        </a>
+                    </p>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
-<style>
-    .bg-light {
-        background-color: #f8f9fa;
-    }
-
-    input.form-control {
-        height: 42px; /* nhỏ hơn */
-        font-size: 0.95rem;
-    }
-
-    button.btn {
-        height: 42px;
-        font-size: 0.95rem;
-    }
-
-</style>

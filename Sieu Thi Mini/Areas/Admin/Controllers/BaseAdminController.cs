@@ -4,7 +4,7 @@ using Sieu_Thi_Mini.Filters;
 
 namespace Sieu_Thi_Mini.Areas.Admin.Controllers
 {
-    //[RoleAuthorize("Admin")]
+    [RoleAuthorize("Admin")]
     public abstract class BaseAdminController : Controller
     {
 

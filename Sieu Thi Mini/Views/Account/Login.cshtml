@@ -3,64 +3,374 @@
     ViewData["Title"] = "Đăng nhập";
 }
 
-<div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
-    <div class="card shadow-lg p-4" style="width: 100%; max-width: 400px;">
-        <div class="text-center mb-4">
-            <h3 class="fw-bold">🔑 Đăng nhập</h3>
-            <p class="text-muted mb-0">Nhập thông tin tài khoản của bạn</p>
-        </div>
+<style>
+    :root {
+        --primary: #e63946;
+        --primary-dark: #d00000;
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+        --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+        --shadow-xl: 0 12px 48px rgba(0,0,0,0.15);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-        @if (ViewBag.Error != null)
-        {
-            <div class="alert alert-danger">
-                <i class="bi bi-exclamation-triangle-fill me-1"></i>@ViewBag.Error
-            </div>
+    /* ========== LOGIN CONTAINER ========== */
+    .login-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 1rem;
+        position: relative;
+    }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(230, 57, 70, 0.03) 0%, rgba(230, 57, 70, 0.01) 100%), radial-gradient(circle at 20% 50%, rgba(230, 57, 70, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(230, 57, 70, 0.05) 0%, transparent 50%);
+            pointer-events: none;
         }
 
-        <form asp-action="Login" asp-controller="Account" method="post">
-            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+    /* ========== LOGIN CARD ========== */
+    .login-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        width: 100%;
+        max-width: 480px;
+        position: relative;
+        animation: fadeInUp 0.6s ease-out;
+    }
 
-            <div class="mb-3">
-                <label class="form-label fw-bold">Email</label>
-                <input name="email"
-                       type="email"
-                       class="form-control"
-                       placeholder="Nhập email"
-                       required />
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ========== CARD HEADER ========== */
+    .login-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        padding: 3rem 2.5rem 2.5rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .login-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+    @@keyframes shimmer {
+        0%, 100% {
+            transform: translate(0, 0);
+        }
+
+        50% {
+            transform: translate(-20px, -20px);
+        }
+    }
+
+    .login-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        backdrop-filter: blur(10px);
+        position: relative;
+        z-index: 1;
+    }
+
+    .login-title {
+        color: white;
+        font-weight: 700;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .login-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ========== CARD BODY ========== */
+    .login-body {
+        padding: 2.5rem;
+    }
+
+    /* ========== ALERT ========== */
+    .custom-alert {
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
+        border: 2px solid rgba(220, 53, 69, 0.2);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        color: #dc3545;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        animation: shake 0.5s;
+    }
+
+    @@keyframes shake {
+        0%, 100% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-10px);
+        }
+
+        75% {
+            transform: translateX(10px);
+        }
+    }
+
+    .custom-alert i {
+        font-size: 1.5rem;
+    }
+
+    /* ========== FORM ELEMENTS ========== */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .form-label i {
+            color: var(--primary);
+            font-size: 1.125rem;
+        }
+
+    .form-control-wrapper {
+        position: relative;
+    }
+
+    .form-control-icon {
+        position: absolute;
+        left: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 1.125rem;
+        pointer-events: none;
+        transition: var(--transition);
+    }
+
+    .form-control {
+        height: 56px;
+        padding: 0.875rem 1.25rem 0.875rem 3.25rem;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: var(--transition);
+        background: #f8f9fa;
+    }
+
+        .form-control:focus {
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(230, 57, 70, 0.1);
+            outline: none;
+        }
+
+            .form-control:focus ~ .form-control-icon {
+                color: var(--primary);
+            }
+
+    /* ========== BUTTON ========== */
+    .btn-login {
+        height: 56px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 700;
+        font-size: 1.125rem;
+        width: 100%;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-top: 2rem;
+    }
+
+        .btn-login:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #b00000 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: white;
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+    /* ========== FOOTER LINKS ========== */
+    .login-footer {
+        text-align: center;
+        padding-top: 1.5rem;
+        border-top: 2px solid #f0f0f0;
+        margin-top: 2rem;
+    }
+
+    .login-footer-text {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    .login-footer-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 700;
+        transition: var(--transition);
+    }
+
+        .login-footer-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+    /* ========== RESPONSIVE ========== */
+    @@media (max-width: 575.98px) {
+        .login-container {
+            padding: 2rem 1rem;
+        }
+
+        .login-header {
+            padding: 2rem 1.5rem 1.5rem;
+        }
+
+        .login-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+        }
+
+        .login-body {
+            padding: 2rem 1.5rem;
+        }
+
+        .form-control,
+        .btn-login {
+            height: 50px;
+        }
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-card">
+        <!-- Card Header -->
+        <div class="login-header">
+            <div class="login-icon">
+                <i class="bi bi-person-circle text-white"></i>
             </div>
+            <h1 class="login-title">Đăng nhập</h1>
+            <p class="login-subtitle">Nhập thông tin tài khoản của bạn</p>
+        </div>
 
-            <div class="mb-3">
-                <label class="form-label fw-bold">Mật khẩu</label>
-                <input name="password"
-                       type="password"
-                       class="form-control"
-                       placeholder="Nhập mật khẩu"
-                       required />
-            </div>
+        <!-- Card Body -->
+        <div class="login-body">
+            @if (ViewBag.Error != null)
+            {
+                <div class="custom-alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>@ViewBag.Error</span>
+                </div>
+            }
 
-            <button type="submit" class="btn btn-primary w-100 fw-bold">
-                Đăng nhập
-            </button>
-        </form>
+            <form asp-action="Login" asp-controller="Account" method="post">
+                <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
 
-        <div class="text-center mt-3">
-            <span class="text-muted">Chưa có tài khoản?</span>
-            <a asp-action="Register" asp-controller="Account" class="fw-bold ms-1">Đăng ký</a>
+                <!-- Email Field -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-envelope-fill"></i>
+                        Email
+                    </label>
+                    <div class="form-control-wrapper">
+                        <input name="email"
+                               type="email"
+                               class="form-control"
+                               placeholder="example@email.com"
+                               required />
+                        <i class="bi bi-at form-control-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-lock-fill"></i>
+                        Mật khẩu
+                    </label>
+                    <div class="form-control-wrapper">
+                        <input name="password"
+                               type="password"
+                               class="form-control"
+                               placeholder="Nhập mật khẩu của bạn"
+                               required />
+                        <i class="bi bi-key-fill form-control-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-login">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Đăng nhập</span>
+                </button>
+
+                <!-- Footer -->
+                <div class="login-footer">
+                    <p class="login-footer-text">
+                        Chưa có tài khoản?
+                        <a asp-action="Register" asp-controller="Account" class="login-footer-link">
+                            Đăng ký ngay
+                        </a>
+                    </p>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
-<style>
-    .bg-light {
-        background-color: #f8f9fa;
-    }
-
-    input.form-control {
-        height: 45px;
-    }
-
-    button.btn {
-        height: 45px;
-    }
-
-</style>

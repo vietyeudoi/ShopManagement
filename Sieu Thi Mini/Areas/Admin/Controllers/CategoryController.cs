@@ -17,11 +17,22 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
         }
 
         // /admin/category
-        public IActionResult Index()
+        public IActionResult Index(int page = 1, int pageSize = 10)
         {
-            var categories = _context.Categories.ToList();
+            var totalItems = _context.Categories.Count();
+
+            var categories = _context.Categories
+                .OrderBy(c => c.CategoryId) // nhớ order trước khi Skip
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
             return View(categories);
         }
+
 
         // /admin/category/create
         public IActionResult Create()

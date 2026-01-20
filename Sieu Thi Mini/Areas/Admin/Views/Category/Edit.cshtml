@@ -22,9 +22,6 @@
                         @Html.AntiForgeryToken()
                         <input type="hidden" asp-for="CategoryId" />
 
-                        <!-- Validation Summary -->
-                        <div asp-validation-summary="All" class="alert alert-danger mb-3" role="alert"></div>
-
                         <!-- Tên danh mục -->
                         <div class="mb-3">
                             <label asp-for="CategoryName" class="form-label fw-bold">Tên danh mục <span class="text-danger">*</span></label>

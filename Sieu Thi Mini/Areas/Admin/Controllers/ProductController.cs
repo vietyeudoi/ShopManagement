@@ -19,14 +19,24 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
             _env = env;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
         {
+            var totalItems = await _context.Products.CountAsync();
+
             var products = await _context.Products
                 .Include(p => p.Category)
+                .OrderBy(p => p.ProductId)   // bắt buộc order trước Skip
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages =
+                (int)Math.Ceiling((double)totalItems / pageSize);
 
             return View(products);
         }
+
 
 
         public IActionResult Create()
