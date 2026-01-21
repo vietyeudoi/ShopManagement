@@ -1,0 +1,31 @@
+﻿@using Sieu_Thi_Mini.Models
+@model IEnumerable<Order>
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Chi tiết doanh thu";
+}
+<h3>📊 Chi tiết doanh thu</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Mã đơn</th>
+            <th>Ngày đặt</th>
+            <th>Nhân viên</th>
+            <th>Tổng tiền</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.OrderId</td>
+                <td>@item.OrderDate?.ToString("dd/MM/yyyy")</td>
+                <td>@item.User?.FullName</td>
+                <td class="text-success">
+                    @item.TotalAmount.ToString("N0") đ
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

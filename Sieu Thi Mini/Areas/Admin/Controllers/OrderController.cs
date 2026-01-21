@@ -22,29 +22,11 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
             return View(orders);
         }
 
-        //public IActionResult Details(int id)
-        //{
-        //    var order = _context.Orders
-        //        .Include(o => o.User)
-        //        .Include(o => o.Customer)
-        //        .Include(o => o.OrderDetails)
-        //        .ThenInclude(od => od.Product)
-        //        .FirstOrDefault(o => o.OrderId == id);
-
-        //    if (order == null)
-        //        return NotFound();
-
-        //    // Lấy thông tin thanh toán
-        //    var payment = _context.Payments.FirstOrDefault(p => p.OrderId == id);
-        //    ViewBag.Payment = payment;
-
-        //    return View(order);
-        //}
 
 
-        public IActionResult Details(string id)  // Đổi từ int sang string
+        public IActionResult Details(string id) 
         {
-            // Parse string sang int
+
             if (!int.TryParse(id, out int orderId))
             {
                 return BadRequest("Invalid order ID");
@@ -60,7 +42,6 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
             if (order == null)
                 return NotFound();
 
-            // Lấy thông tin thanh toán
             var payment = _context.Payments.FirstOrDefault(p => p.OrderId == orderId);
             ViewBag.Payment = payment;
 
@@ -105,7 +86,6 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
             {
                 order.Payment.PaymentDate = DateTime.Now;
 
-                // Thanh toán xong → Xác nhận đơn hàng
                 order.Status = Order.OrderStatus.Confirmed;
             }else if(status == Payment.PaymentStatusEnum.Failed)
             {

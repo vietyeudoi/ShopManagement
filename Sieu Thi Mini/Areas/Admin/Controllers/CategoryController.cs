@@ -16,7 +16,6 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
             _context = context;
         }
 
-        // /admin/category
         public IActionResult Index(int page = 1, int pageSize = 10)
         {
             var totalItems = _context.Categories.Count();
@@ -33,8 +32,6 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
             return View(categories);
         }
 
-
-        // /admin/category/create
         public IActionResult Create()
         {
             return View();
@@ -66,7 +63,6 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
             return View(model);
         }
 
-        // /admin/category/edit/5
         public IActionResult Edit(int id)
         {
             var category = _context.Categories.Find(id);
@@ -87,7 +83,6 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
             return View(model);
         }
 
-        // Ẩn danh mục (không xóa cứng)
         public IActionResult Toggle(int id)
         {
             var category = _context.Categories.Find(id);
@@ -99,7 +94,6 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
-        // GET: admin/category/delete/5
         public IActionResult Delete(int id)
         {
             var category = _context.Categories
@@ -117,7 +111,6 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
             return View(category);
         }
 
-        // POST: admin/category/delete/5
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {

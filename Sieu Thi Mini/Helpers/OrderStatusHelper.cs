@@ -23,11 +23,11 @@ namespace Sieu_Thi_Mini.Helpers
         {
             return status switch
             {
-                Order.OrderStatus.Pending => "badge bg-secondary",        // Chờ xác nhận (xám)
-                Order.OrderStatus.Confirmed => "badge bg-primary",          // Đã xác nhận (xanh dương)
-                Order.OrderStatus.InProgress => "badge bg-info text-dark",   // Đang giao (xanh nhạt)
-                Order.OrderStatus.Completed => "badge bg-success",          // Thành công (xanh lá)
-                Order.OrderStatus.Cancelled => "badge bg-danger",           // Đã hủy (đỏ)
+                Order.OrderStatus.Pending => "badge bg-secondary",        
+                Order.OrderStatus.Confirmed => "badge bg-primary",          
+                Order.OrderStatus.InProgress => "badge bg-info text-dark",   
+                Order.OrderStatus.Completed => "badge bg-success",          
+                Order.OrderStatus.Cancelled => "badge bg-danger",         
                 _ => "badge bg-dark"
             };
         }

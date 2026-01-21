@@ -1,61 +1,109 @@
 ﻿@model Sieu_Thi_Mini.Models.Customer
+
 @{
+    Layout = "_LayoutAdmin";
     ViewData["Title"] = "Sửa khách hàng";
 }
 
 <div class="container py-4">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4 admin-breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a asp-area="Admin"
+                   asp-controller="Dashboard"
+                   asp-action="Index">
+                    Trang quản trị
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a asp-area="Admin"
+                   asp-controller="Customer"
+                   asp-action="Index">
+                    Khách hàng
+                </a>
+            </li>
+            <li class="breadcrumb-item active">
+                Sửa thông tin
+            </li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+
+            <div class="admin-card">
+
+                <!-- Header -->
+                <div class="admin-header">
+                    <h5>
                         <i class="bi bi-pencil-square me-2"></i>
                         Sửa thông tin khách hàng
-                    </h4>
+                    </h5>
                 </div>
-                <div class="card-body">
+
+                <!-- Body -->
+                <div class="admin-body">
+
                     <form asp-area="Admin"
                           asp-controller="Customer"
                           asp-action="Edit"
                           asp-route-id="@Model.CustomerId"
-                          method="post">
+                          method="post"
+                          class="admin-form">
+
                         @Html.AntiForgeryToken()
                         <input type="hidden" asp-for="CustomerId" />
 
                         <!-- Thông tin cơ bản -->
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Họ tên <span class="text-danger">*</span></label>
-                                <input asp-for="FullName" class="form-control" required />
-                                <span asp-validation-for="FullName" class="text-danger"></span>
+                                <label asp-for="FullName" class="form-label">
+                                    Họ tên <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="FullName" class="form-control" />
+                                <span asp-validation-for="FullName" class="text-danger small"></span>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Email <span class="text-danger">*</span></label>
-                                <input asp-for="Email" type="email" class="form-control" required />
-                                <span asp-validation-for="Email" class="text-danger"></span>
+                                <label asp-for="Email" class="form-label">
+                                    Email <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="Email" type="email" class="form-control" />
+                                <span asp-validation-for="Email" class="text-danger small"></span>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Số điện thoại</label>
-                                <input asp-for="Phone" class="form-control" placeholder="0123456789" />
-                                <span asp-validation-for="Phone" class="text-danger"></span>
+                                <label asp-for="Phone" class="form-label">
+                                    Số điện thoại
+                                </label>
+                                <input asp-for="Phone"
+                                       class="form-control"
+                                       placeholder="0123456789" />
+                                <span asp-validation-for="Phone" class="text-danger small"></span>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Mật khẩu mới</label>
-                                <input asp-for="Password" type="password" class="form-control"
+                                <label class="form-label">
+                                    Mật khẩu mới
+                                </label>
+                                <input asp-for="Password"
+                                       type="password"
+                                       class="form-control"
                                        placeholder="Để trống nếu không đổi" />
-                                <small class="text-muted">Chỉ nhập nếu muốn thay đổi mật khẩu</small>
-                                <span asp-validation-for="Password" class="text-danger"></span>
+                                <small class="text-muted">
+                                    Chỉ nhập nếu muốn thay đổi mật khẩu
+                                </small>
+                                <span asp-validation-for="Password" class="text-danger small"></span>
                             </div>
                         </div>
 
                         <!-- Địa chỉ -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">
+                        <div class="mb-4">
+                            <label class="form-label">
                                 <i class="bi bi-geo-alt-fill text-danger me-1"></i>
                                 Danh sách địa chỉ
                             </label>
@@ -71,10 +119,10 @@
                                         </div>
                                     }
                                 </div>
+
                                 <small class="text-muted">
-                                    <i class="bi bi-info-circle"></i>
                                     Khách hàng có @Model.Addresses.Count địa chỉ.
-                                    Để quản lý chi tiết, khách hàng cần đăng nhập và vào trang Hồ sơ cá nhân.
+                                    Quản lý chi tiết tại trang Hồ sơ cá nhân.
                                 </small>
                             }
                             else
@@ -87,39 +135,48 @@
                         </div>
 
                         <!-- Trạng thái -->
-                        <div class="mb-4">
+                        <div class="mb-4 admin-switch">
                             <div class="form-check form-switch">
-                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
-                                <label class="form-check-label fw-bold">
+                                <input asp-for="IsActive"
+                                       class="form-check-input"
+                                       type="checkbox" />
+                                <label asp-for="IsActive" class="form-check-label">
                                     Tài khoản hoạt động
                                 </label>
                             </div>
-                            <small class="text-muted">Tắt để vô hiệu hóa tài khoản này</small>
+                            <small class="text-muted">
+                                Tắt để vô hiệu hóa tài khoản này
+                            </small>
                         </div>
 
-                        <!-- Buttons -->
-                        <div class="d-flex gap-2 justify-content-end">
+                        <hr class="my-4" />
+
+                        <!-- Actions -->
+                        <div class="admin-actions">
                             <a asp-area="Admin"
                                asp-controller="Customer"
                                asp-action="Index"
-                               class="btn btn-secondary">
-                                <i class="bi bi-arrow-left me-1"></i>
+                               class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i>
                                 Quay lại
                             </a>
-                            <button type="submit" class="btn btn-primary">
+
+                            <button type="submit"
+                                    class="btn btn-primary btn-admin-primary">
                                 <i class="bi bi-save me-1"></i>
                                 Cập nhật
                             </button>
                         </div>
+
                     </form>
+
                 </div>
             </div>
+
         </div>
     </div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
 }

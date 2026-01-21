@@ -1,7 +1,78 @@
 ﻿@model Sieu_Thi_Mini.Models.Customer
 @{
+    Layout = "_LayoutAdmin";
     ViewData["Title"] = "Thêm khách hàng mới";
 }
+
+<style>
+
+    .card {
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .card-header.bg-success {
+        background: linear-gradient(135deg, #28a745, #218838) !important;
+    }
+
+    /* Title */
+    .card-header h4 {
+        font-weight: 600;
+    }
+
+    /* Form label */
+    .form-label {
+        font-size: 0.95rem;
+    }
+
+    /* Input focus */
+    .form-control:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+
+    /* Validation */
+    .text-danger {
+        font-size: 0.85rem;
+    }
+
+    /* Info alert */
+    .alert-info {
+        border-left: 4px solid #0dcaf0;
+        background-color: #f0fbff;
+    }
+
+    /* Switch */
+    .form-check-input:checked {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    /* Buttons */
+    .btn-success {
+        box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+    }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.45);
+        }
+
+    .btn-secondary:hover {
+        background-color: #e0e0e0;
+    }
+
+    @@media (max-width: 768px) {
+        .btn {
+            width: 100%;
+        }
+
+        .d-flex.justify-content-end {
+            flex-direction: column-reverse;
+            gap: 10px;
+        }
+    }
+</style>
 
 <div class="container py-4">
     <div class="row">
@@ -13,6 +84,7 @@
                         Thêm khách hàng mới
                     </h4>
                 </div>
+
                 <div class="card-body">
                     <form asp-area="Admin"
                           asp-controller="Customer"
@@ -20,7 +92,6 @@
                           method="post">
                         @Html.AntiForgeryToken()
 
-                        <!-- Thông tin cơ bản -->
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">
@@ -68,19 +139,15 @@
                                        placeholder="0123456789"
                                        pattern="[0-9]{10,11}" />
                                 <span asp-validation-for="Phone" class="text-danger"></span>
-                                <small class="text-muted">10-11 chữ số</small>
+                                <small class="text-muted">10–11 chữ số</small>
                             </div>
                         </div>
 
-                        <!-- ❌ XÓA INPUT ADDRESS - Không còn cột Address trong Customer -->
-                        <!-- Khách hàng sẽ tự thêm địa chỉ qua trang Profile sau khi đăng nhập -->
-
                         <div class="alert alert-info mb-3">
                             <i class="bi bi-info-circle me-2"></i>
-                            <strong>Lưu ý:</strong> Khách hàng có thể thêm địa chỉ giao hàng sau khi đăng nhập vào trang Hồ sơ cá nhân.
+                            <strong>Lưu ý:</strong> Khách hàng có thể thêm địa chỉ giao hàng sau khi đăng nhập.
                         </div>
 
-                        <!-- Trạng thái -->
                         <div class="mb-4">
                             <div class="form-check form-switch">
                                 <input asp-for="IsActive"
@@ -94,7 +161,6 @@
                             <small class="text-muted">Tài khoản có thể đăng nhập ngay sau khi tạo</small>
                         </div>
 
-                        <!-- Buttons -->
                         <div class="d-flex gap-2 justify-content-end">
                             <a asp-area="Admin"
                                asp-controller="Customer"

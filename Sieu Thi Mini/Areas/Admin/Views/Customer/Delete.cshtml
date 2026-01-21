@@ -1,30 +1,109 @@
 ﻿@model Sieu_Thi_Mini.Models.Customer
 
 @{
-    ViewData["Title"] = "Delete Customer";
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Xóa khách hàng";
 }
 
-<h2>Xóa khách hàng</h2>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card delete-card shadow border-0">
+                <div class="delete-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Xác nhận xóa khách hàng
+                    </h5>
+                </div>
 
-<h4>Bạn có chắc chắn muốn xóa khách hàng này?</h4>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        Bạn có chắc chắn muốn xóa khách hàng sau không?
+                        <br />
+                        <strong class="text-danger">Hành động này không thể hoàn tác.</strong>
+                    </p>
 
-<hr />
+                    <dl class="row">
+                        <dt class="col-sm-3">Họ tên</dt>
+                        <dd class="col-sm-9">@Model.FullName</dd>
 
-<dl class="row">
-    <dt class="col-sm-2">Họ tên</dt>
-    <dd class="col-sm-10">@Model.FullName</dd>
+                        <dt class="col-sm-3">Email</dt>
+                        <dd class="col-sm-9">@Model.Email</dd>
 
-    <dt class="col-sm-2">Email</dt>
-    <dd class="col-sm-10">@Model.Email</dd>
+                        <dt class="col-sm-3">SĐT</dt>
+                        <dd class="col-sm-9">@Model.Phone</dd>
+                    </dl>
 
-    <dt class="col-sm-2">SĐT</dt>
-    <dd class="col-sm-10">@Model.Phone</dd>
-</dl>
+                    <hr />
 
-<form asp-action="Delete" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="CustomerId" />
+                    <form asp-action="Delete" method="post" class="d-flex justify-content-end gap-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="CustomerId" />
 
-    <button type="submit" class="btn btn-danger">Xóa</button>
-    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
-</form>
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4">
+                            <i class="bi bi-arrow-left me-1"></i> Hủy
+                        </a>
+
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="bi bi-trash me-1"></i> Xóa
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .delete-card {
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .delete-header {
+            background: linear-gradient(135deg, #dc3545, #b02a37);
+            color: #fff;
+            padding: 16px 20px;
+        }
+
+            .delete-header i {
+                color: #ffd6d9;
+            }
+
+        /* Description list */
+        .delete-card dl dt {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .delete-card dl dd {
+            margin-bottom: 12px;
+        }
+
+        /* Buttons */
+        .delete-card .btn-danger {
+            box-shadow: 0 6px 15px rgba(220, 53, 69, 0.3);
+        }
+
+            .delete-card .btn-danger:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 8px 20px rgba(220, 53, 69, 0.45);
+            }
+
+        .delete-card .btn-outline-secondary:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .delete-card form {
+                flex-direction: column-reverse;
+            }
+
+            .delete-card .btn {
+                width: 100%;
+            }
+        }
+    </style>
+}

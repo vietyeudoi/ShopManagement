@@ -18,7 +18,6 @@ namespace Sieu_Thi_Mini.Filters
             var session = context.HttpContext.Session;
             var role = session.GetString("Role");
 
-            // ❌ Chưa đăng nhập
             if (string.IsNullOrEmpty(role))
             {
                 var request = context.HttpContext.Request;
@@ -34,7 +33,6 @@ namespace Sieu_Thi_Mini.Filters
                 return;
             }
 
-            // ❌ Sai role
             if (role != _role)
             {
                 context.Result = new RedirectToActionResult(

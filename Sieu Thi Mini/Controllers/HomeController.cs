@@ -32,7 +32,6 @@ namespace Sieu_Thi_Mini.Controllers
             _context = context;
             
         }
-        //[RoleAuthorize("Customer")]
 
         public IActionResult Index(int? categoryId)
         {

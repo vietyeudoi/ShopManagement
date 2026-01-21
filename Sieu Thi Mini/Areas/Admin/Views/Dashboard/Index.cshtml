@@ -1,17 +1,130 @@
-﻿@{
+﻿@model List<Sieu_Thi_Mini.Models.Order>
+
+@{
     Layout = "_LayoutAdmin";
-    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    .stat-card {
+        border-radius: 12px;
+        padding: 20px;
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .stat-icon {
+        font-size: 32px;
+        opacity: 0.9;
+    }
+
+    .stat-title {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    .stat-value {
+        font-size: 26px;
+        font-weight: bold;
+    }
+
+    .bg-users {
+        background: linear-gradient(135deg, #4e73df, #224abe);
+    }
+
+    .bg-products {
+        background: linear-gradient(135deg, #1cc88a, #13855c);
+    }
+
+    .bg-orders {
+        background: linear-gradient(135deg, #36b9cc, #258391);
+    }
+
+    .bg-revenue {
+        background: linear-gradient(135deg, #f6c23e, #dda20a);
+    }
+
+    .table thead {
+        background-color: #f8f9fc;
+    }
+
+    .table td, .table th {
+        vertical-align: middle;
+    }
+</style>
+
+<div class="mb-4">
+    <h2 class="fw-bold"> BÁO CÁO TỔNG HỢP</h2>
+    <p class="text-muted">Thống kê nhanh tình hình hệ thống</p>
 </div>
-<h2>Dashboard - Quản trị</h2>
-<div>
-    <p>Tổng User: <b>@ViewBag.TotalUser</b></p>
-    <p>Tổng Khách hàng: <b>@ViewBag.TotalCustomer</b></p>
-    <p>Tổng Sản phẩm: <b>@ViewBag.TotalProduct</b></p>
-    <p>Tổng Đơn hàng: <b>@ViewBag.TotalOrder</b></p>
-    <p>Doanh thu hôm nay: <b>@ViewBag.TodayRevenue.ToString("N0") VNĐ</b></p>
+
+<div class="row g-4">
+
+    <div class="col-md-3">
+        <a asp-area="Admin" asp-controller="User" asp-action="Index"
+           class="text-decoration-none">
+            <div class="stat-card bg-primary text-white">
+                <h6>TỔNG NGƯỜI DÙNG</h6>
+                <h2>@ViewBag.TotalUsers</h2>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-3">
+        <a asp-area="Admin" asp-controller="Product" asp-action="Index"
+           class="text-decoration-none">
+            <div class="stat-card bg-success text-white">
+                <h6>TỔNG SẢN PHẨM</h6>
+                <h2>@ViewBag.TotalProducts</h2>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-3">
+        <a asp-area="Admin" asp-controller="Order" asp-action="Index"
+           class="text-decoration-none">
+            <div class="stat-card bg-info text-white">
+                <h6>TỔNG ĐƠN HÀNG</h6>
+                <h2>@ViewBag.TotalOrders</h2>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-3">
+        <a asp-area="Admin" asp-controller="Report" asp-action="Revenue"
+           class="text-decoration-none">
+            <div class="stat-card bg-warning text-white">
+                <h6>DOANH THU</h6>
+                <h2>@ViewBag.TotalRevenue.ToString("N0") đ</h2>
+            </div>
+        </a>
+    </div>
+
 </div>
+
+<hr class="my-4" />
+
+<h4 class="fw-bold mb-3">🕒 5 đơn hàng mới nhất</h4>
+
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr class="text-center">
+            <th>Mã đơn</th>
+            <th>Nhân viên</th>
+            <th>Ngày đặt</th>
+            <th>Tổng tiền</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr class="text-center">
+                <td>@item.OrderId</td>
+                <td>@item.User?.FullName</td>
+                <td>@item.OrderDate?.ToString("dd/MM/yyyy")</td>
+                <td class="fw-bold text-success">
+                    @String.Format("{0:N0}", item.TotalAmount) ₫
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

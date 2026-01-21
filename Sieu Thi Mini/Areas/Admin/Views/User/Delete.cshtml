@@ -1,27 +1,118 @@
 ﻿@model Sieu_Thi_Mini.Models.User
 
 @{
-    ViewData["Title"] = "Delete User";
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Xóa người dùng";
 }
 
-<h2>Xóa người dùng</h2>
+<div class="container py-4">
 
-<h4>Bạn có chắc chắn muốn xóa người dùng này?</h4>
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
 
-<hr />
+            <div class="card shadow delete-card">
 
-<dl class="row">
-    <dt class="col-sm-2">Họ tên</dt>
-    <dd class="col-sm-10">@Model.FullName</dd>
+                <!-- Header -->
+                <div class="delete-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Xác nhận xóa người dùng
+                    </h5>
+                </div>
 
-    <dt class="col-sm-2">Email</dt>
-    <dd class="col-sm-10">@Model.Email</dd>
-</dl>
+                <!-- Body -->
+                <div class="card-body">
 
-<form asp-action="Delete" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="UserId" />
+                    <div class="alert alert-warning">
+                        <strong>Cảnh báo:</strong>
+                        Hành động này không thể hoàn tác.
+                    </div>
 
-    <button type="submit" class="btn btn-danger">Xóa</button>
-    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
-</form>
+                    <dl class="row mb-4">
+                        <dt class="col-sm-4">Họ tên</dt>
+                        <dd class="col-sm-8 fw-semibold">@Model.FullName</dd>
+
+                        <dt class="col-sm-4">Email</dt>
+                        <dd class="col-sm-8">@Model.Email</dd>
+                    </dl>
+
+                    <form asp-action="Delete" method="post"
+                          class="d-flex justify-content-end gap-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="UserId" />
+
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            Hủy
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i>
+                            Xóa
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        /* ===== DELETE USER – ADMIN UI ===== */
+
+        .delete-card {
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .delete-header {
+            background: linear-gradient(135deg, #dc3545, #b02a37);
+            color: #fff;
+            padding: 16px 20px;
+        }
+
+            .delete-header i {
+                color: #ffd6d9;
+            }
+
+        /* Description list */
+        .delete-card dt {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .delete-card dd {
+            margin-bottom: 12px;
+        }
+
+        /* Buttons */
+        .delete-card .btn-danger {
+            box-shadow: 0 6px 15px rgba(220, 53, 69, 0.35);
+        }
+
+            .delete-card .btn-danger:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 8px 20px rgba(220, 53, 69, 0.5);
+            }
+
+        .delete-card .btn-outline-secondary:hover {
+            background-color: #f1f3f5;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .delete-card form {
+                flex-direction: column-reverse;
+                gap: 10px;
+            }
+
+            .delete-card .btn {
+                width: 100%;
+            }
+        }
+    </style>
+}

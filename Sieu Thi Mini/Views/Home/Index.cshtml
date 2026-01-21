@@ -626,10 +626,6 @@
                                     <div class="d-flex justify-content-between align-items-end">
                                         <div>
                                             <div class="product-price">@p.Price.ToString("N0")₫</div>
-                                            <div class="product-stock">
-                                                <i class="bi bi-box-seam"></i>
-                                                <span>Còn @p.Stock</span>
-                                            </div>
                                         </div>
                                         <a asp-area="Customer" asp-controller="Cart" asp-action="Add" asp-route-id="@p.ProductId"
                                            class="add-to-cart-btn"

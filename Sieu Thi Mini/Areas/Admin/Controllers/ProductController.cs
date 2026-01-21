@@ -19,16 +19,16 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
             _env = env;
         }
 
-        public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
+        public IActionResult Index(int page = 1, int pageSize = 10)
         {
-            var totalItems = await _context.Products.CountAsync();
+            var totalItems = _context.Products.Count();
 
-            var products = await _context.Products
+            var products = _context.Products
                 .Include(p => p.Category)
-                .OrderBy(p => p.ProductId)   // bắt buộc order trước Skip
+                .OrderBy(p => p.ProductId)   
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
+                .ToList();
 
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages =
@@ -105,7 +105,6 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
             var product = _context.Products.FirstOrDefault(p => p.ProductId == id);
             if (product == null) return NotFound();
 
-            // CẬP NHẬT TEXT
             product.ProductName = model.ProductName;
             product.Price = model.Price;
             product.Stock = model.Stock;
@@ -113,7 +112,6 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
             product.IsActive = model.IsActive;
             product.CategoryId = model.CategoryId;
 
-            // ===== XỬ LÝ ẢNH =====
             if (imageFile != null && imageFile.Length > 0)
             {
                 var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/upload");
@@ -121,7 +119,6 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
                 if (!Directory.Exists(uploadPath))
                     Directory.CreateDirectory(uploadPath);
 
-                // XÓA ẢNH CŨ
                 if (!string.IsNullOrEmpty(product.ImageUrl))
                 {
                     var oldImage = Path.Combine(uploadPath, product.ImageUrl);
@@ -129,7 +126,6 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
                         System.IO.File.Delete(oldImage);
                 }
 
-                // TÊN FILE MỚI
                 var fileName = Guid.NewGuid() + Path.GetExtension(imageFile.FileName);
                 var filePath = Path.Combine(uploadPath, fileName);
 
@@ -167,7 +163,7 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
 
             return View(product);
         }
-        // POST: admin/product/delete/5
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
@@ -175,7 +171,7 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
             var product = _context.Products.Find(id);
             if (product == null) return NotFound();
 
-            // ❗ XOÁ ẢNH
+
             if (!string.IsNullOrEmpty(product.ImageUrl))
             {
                 var path = Path.Combine(

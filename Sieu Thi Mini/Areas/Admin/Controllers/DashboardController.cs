@@ -5,37 +5,31 @@ using Sieu_Thi_Mini.Models;
 namespace Sieu_Thi_Mini.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class DashboardController : BaseAdminController
+    public class DashboardController : Controller
     {
         private readonly ShopManagementContext _context;
         public DashboardController(ShopManagementContext context)
         {
             _context = context;
         }
+
         public IActionResult Index()
         {
-            ViewBag.TotalUser = _context.Users.Count();
+            ViewBag.TotalUsers = _context.Users.Count();
 
-            ViewBag.TotalCustomer = _context.Customers.Count();
+            ViewBag.TotalProducts = _context.Products.Count();
 
-            ViewBag.TotalProduct = _context.Products.Count();
+            ViewBag.TotalRevenue = _context.Orders.Sum(o => o.TotalAmount);
 
-            ViewBag.TotalOrder = _context.Orders.Count();
+            ViewBag.TotalOrders = _context.Orders.Count();
 
-            ViewBag.TodayRevenue = _context.Orders
-                .Where(o => o.OrderDate >= DateTime.Today
-                         && o.OrderDate < DateTime.Today.AddDays(1))
-                .Sum(o => (decimal?)o.TotalAmount) ?? 0;
-
-            ViewBag.LatestOrders = _context.Orders
-                .Include(o => o.Customer)
+            var recentOrders = _context.Orders
                 .Include(o => o.User)
                 .OrderByDescending(o => o.OrderDate)
                 .Take(5)
                 .ToList();
 
-            return View();
+            return View(recentOrders);
         }
-
     }
 }

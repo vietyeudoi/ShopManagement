@@ -50,28 +50,24 @@ namespace Sieu_Thi_Mini.Areas.Admin.Controllers
             if (user == null)
                 return RedirectToAction("Login", "Account");
 
-            // ❌ sai mật khẩu hiện tại
             if (!BCrypt.Net.BCrypt.Verify(CurrentPassword, user.Password))
             {
                 ViewBag.Error = "Mật khẩu hiện tại không đúng";
                 return View();
             }
 
-            // ❌ mật khẩu mới không khớp
             if (NewPassword != ConfirmPassword)
             {
                 ViewBag.Error = "Xác nhận mật khẩu không khớp";
                 return View();
             }
 
-            // ❌ mật khẩu mới trùng mật khẩu cũ
             if (BCrypt.Net.BCrypt.Verify(NewPassword, user.Password))
             {
                 ViewBag.Error = "Mật khẩu mới phải khác mật khẩu cũ";
                 return View();
             }
 
-            // ✅ hash mật khẩu mới
             user.Password = BCrypt.Net.BCrypt.HashPassword(NewPassword);
             _context.SaveChanges();
 

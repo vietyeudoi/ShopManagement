@@ -11,9 +11,6 @@ builder.Services.AddDbContext<ShopManagementContext>(options =>
     )
 );
 
-//builder.Services.AddIdentity<User, IdentityRole>()
-//    .AddEntityFrameworkStores<ShopManagementContext>()
-//    .AddDefaultTokenProviders();
 
 
 builder.Services.AddSession(options =>
